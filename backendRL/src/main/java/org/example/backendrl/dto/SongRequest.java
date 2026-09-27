@@ -1,38 +1,19 @@
-package org.example.backendrl.entity;
+package org.example.backendrl.dto;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
-@Entity
-@Table(name = "songs")
-public class Song {
+public class SongRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
+    @NotBlank(message = "Song title is required")
     private String title;
 
     private Integer durationSeconds;
 
     private LocalDate originalReleaseDate;
 
-    @OneToMany(
-            mappedBy = "song",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    private Set<SongGenre> genres = new HashSet<>();
-
-    public Song() {
-    }
-
-    public Long getId() {
-        return id;
+    public SongRequest() {
     }
 
     public String getTitle() {
@@ -57,9 +38,5 @@ public class Song {
 
     public void setOriginalReleaseDate(LocalDate originalReleaseDate) {
         this.originalReleaseDate = originalReleaseDate;
-    }
-
-    public Set<SongGenre> getGenres() {
-        return genres;
     }
 }

@@ -29,13 +29,12 @@ public class Album {
     )
     private Set<Artist> artists = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "album_genres",
-            joinColumns = @JoinColumn(name = "album_id"),
-            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    @OneToMany(
+            mappedBy = "album",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
-    private Set<Genre> genres = new HashSet<>();
+    private Set<AlbumGenre> genres = new HashSet<>();
 
     @OneToMany(
             mappedBy = "album",
@@ -79,7 +78,7 @@ public class Album {
         return artists;
     }
 
-    public Set<Genre> getGenres() {
+    public Set<AlbumGenre> getGenres() {
         return genres;
     }
 
