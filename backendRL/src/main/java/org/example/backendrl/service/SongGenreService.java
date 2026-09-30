@@ -3,6 +3,7 @@ package org.example.backendrl.service;
 import org.example.backendrl.entity.Genre;
 import org.example.backendrl.entity.Song;
 import org.example.backendrl.entity.SongGenre;
+import org.example.backendrl.exception.ConflictException;
 import org.example.backendrl.exception.ResourceNotFoundException;
 import org.example.backendrl.repository.GenreRepository;
 import org.example.backendrl.repository.SongGenreRepository;
@@ -72,7 +73,9 @@ public class SongGenreService {
                 ));
 
         if (songGenreRepository.existsBySongIdAndGenreId(songId, genreId)) {
-            return;
+            throw new ConflictException(
+                    "Song " + songId + " is already associated with genre " + genreId
+            );
         }
 
         SongGenre songGenre = new SongGenre();

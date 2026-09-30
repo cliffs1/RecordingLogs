@@ -5,6 +5,7 @@ import org.example.backendrl.dto.GenreResponse;
 import org.example.backendrl.entity.Artist;
 import org.example.backendrl.entity.ArtistGenre;
 import org.example.backendrl.entity.Genre;
+import org.example.backendrl.exception.ConflictException;
 import org.example.backendrl.exception.ResourceNotFoundException;
 import org.example.backendrl.repository.ArtistGenreRepository;
 import org.example.backendrl.repository.ArtistRepository;
@@ -59,7 +60,9 @@ public class ArtistGenreService {
 
         if (artistGenreRepository.existsByArtistIdAndGenreId(
                 artistId, genreId)) {
-            return;
+            throw new ConflictException(
+                    "Artist " + artistId + " is already associated with genre " +genreId
+            );
         }
 
         ArtistGenre artistGenre = new ArtistGenre();

@@ -4,6 +4,7 @@ import org.example.backendrl.dto.AlbumSummaryResponse;
 import org.example.backendrl.dto.ArtistSummaryResponse;
 import org.example.backendrl.entity.Album;
 import org.example.backendrl.entity.Artist;
+import org.example.backendrl.exception.ConflictException;
 import org.example.backendrl.exception.ResourceNotFoundException;
 import org.example.backendrl.repository.AlbumRepository;
 import org.example.backendrl.repository.ArtistRepository;
@@ -54,7 +55,9 @@ public class AlbumArtistService {
                 ));
 
         if (album.getArtists().contains(artist)) {
-            return;
+            throw new ConflictException(
+                    "Album " + albumId + " is already associated with artist " + artistId
+            );
         }
 
         album.getArtists().add(artist);

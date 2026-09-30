@@ -5,6 +5,7 @@ import org.example.backendrl.dto.AlbumSummaryResponse;
 import org.example.backendrl.entity.Album;
 import org.example.backendrl.entity.AlbumSong;
 import org.example.backendrl.entity.Song;
+import org.example.backendrl.exception.ConflictException;
 import org.example.backendrl.exception.ResourceNotFoundException;
 import org.example.backendrl.repository.AlbumRepository;
 import org.example.backendrl.repository.AlbumSongRepository;
@@ -66,7 +67,9 @@ public class AlbumSongService {
 
         if (albumSongRepository.existsByAlbumIdAndSongId(
                 albumId, songId)) {
-            return;
+            throw new ConflictException(
+                    "Song " + songId + " is already associated with album " + albumId
+            );
         }
 
         AlbumSong albumSong = new AlbumSong();

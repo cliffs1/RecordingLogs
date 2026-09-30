@@ -5,6 +5,7 @@ import org.example.backendrl.dto.SongSummaryResponse;
 import org.example.backendrl.entity.Artist;
 import org.example.backendrl.entity.Song;
 import org.example.backendrl.entity.SongArtist;
+import org.example.backendrl.exception.ConflictException;
 import org.example.backendrl.exception.ResourceNotFoundException;
 import org.example.backendrl.repository.ArtistRepository;
 import org.example.backendrl.repository.ArtistSongRepository;
@@ -59,9 +60,10 @@ public class ArtistSongService {
                         "Song with id " + songId + " not found"
                 ));
 
-        if (artistSongRepository.existsByArtistIdAndSongId(
-                artistId, songId)) {
-            return;
+        if (artistSongRepository.existsByArtistIdAndSongId(artistId, songId)) {
+            throw new ConflictException(
+                    "Song " + songId + " is already associated with artist " + artistId
+            );
         }
 
         SongArtist songArtist = new SongArtist();
