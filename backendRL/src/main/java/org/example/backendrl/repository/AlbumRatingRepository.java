@@ -15,4 +15,10 @@ public interface AlbumRatingRepository extends JpaRepository<AlbumRating, Long> 
     Optional<AlbumRating> findByAlbumIdAndUserId(Long albumId, Long userId);
 
     boolean existsByAlbumIdAndUserId(Long albumId, Long userId);
+
+    List<AlbumRating> findByUserIdInOrderByUpdatedAtDesc(List<Long> userIds);
+
+    void deleteByUserId(Long userId);
+
+    void deleteByAlbumId(Long albumId);
 }

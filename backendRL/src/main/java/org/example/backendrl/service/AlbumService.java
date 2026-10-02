@@ -4,8 +4,13 @@ import org.example.backendrl.dto.AlbumRequest;
 import org.example.backendrl.dto.AlbumResponse;
 import org.example.backendrl.entity.Album;
 import org.example.backendrl.exception.ResourceNotFoundException;
+import org.example.backendrl.repository.AlbumFavoriteRepository;
+import org.example.backendrl.repository.AlbumListItemRepository;
+import org.example.backendrl.repository.AlbumRatingRepository;
 import org.example.backendrl.repository.AlbumRepository;
+import org.example.backendrl.repository.AlbumReviewRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,9 +18,23 @@ import java.util.List;
 public class AlbumService {
 
     private final AlbumRepository albumRepository;
+    private final AlbumRatingRepository albumRatingRepository;
+    private final AlbumReviewRepository albumReviewRepository;
+    private final AlbumFavoriteRepository albumFavoriteRepository;
+    private final AlbumListItemRepository albumListItemRepository;
 
-    public AlbumService(AlbumRepository albumRepository) {
+    public AlbumService(
+            AlbumRepository albumRepository,
+            AlbumRatingRepository albumRatingRepository,
+            AlbumReviewRepository albumReviewRepository,
+            AlbumFavoriteRepository albumFavoriteRepository,
+            AlbumListItemRepository albumListItemRepository) {
+
         this.albumRepository = albumRepository;
+        this.albumRatingRepository = albumRatingRepository;
+        this.albumReviewRepository = albumReviewRepository;
+        this.albumFavoriteRepository = albumFavoriteRepository;
+        this.albumListItemRepository = albumListItemRepository;
     }
 
     public List<AlbumResponse> getAllAlbums() {
@@ -72,6 +91,7 @@ public class AlbumService {
         return toResponse(updatedAlbum);
     }
 
+    @Transactional
     public void deleteAlbum(Long id) {
 
         if (!albumRepository.existsById(id)) {
@@ -79,6 +99,11 @@ public class AlbumService {
                     "Album with id " + id + " not found"
             );
         }
+
+        albumRatingRepository.deleteByAlbumId(id);
+        albumReviewRepository.deleteByAlbumId(id);
+        albumFavoriteRepository.deleteByAlbumId(id);
+        albumListItemRepository.deleteByAlbumId(id);
 
         albumRepository.deleteById(id);
     }

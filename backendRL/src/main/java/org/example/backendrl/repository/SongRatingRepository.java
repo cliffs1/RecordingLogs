@@ -15,4 +15,8 @@ public interface SongRatingRepository extends JpaRepository<SongRating, Long> {
     Optional<SongRating> findBySongIdAndUserId(Long songId, Long userId);
 
     boolean existsBySongIdAndUserId(Long songId, Long userId);
+
+    List<SongRating> findByUserIdInOrderByUpdatedAtDesc(List<Long> userIds);
+
+    void deleteByUserId(Long userId);
 }

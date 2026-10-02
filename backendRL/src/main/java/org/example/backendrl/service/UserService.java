@@ -5,8 +5,15 @@ import org.example.backendrl.dto.UserResponse;
 import org.example.backendrl.entity.User;
 import org.example.backendrl.exception.ConflictException;
 import org.example.backendrl.exception.ResourceNotFoundException;
+import org.example.backendrl.repository.AlbumFavoriteRepository;
+import org.example.backendrl.repository.AlbumListRepository;
+import org.example.backendrl.repository.AlbumRatingRepository;
+import org.example.backendrl.repository.AlbumReviewRepository;
+import org.example.backendrl.repository.SongRatingRepository;
+import org.example.backendrl.repository.UserFollowRepository;
 import org.example.backendrl.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,9 +21,29 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final AlbumRatingRepository albumRatingRepository;
+    private final SongRatingRepository songRatingRepository;
+    private final AlbumReviewRepository albumReviewRepository;
+    private final AlbumFavoriteRepository albumFavoriteRepository;
+    private final AlbumListRepository albumListRepository;
+    private final UserFollowRepository userFollowRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(
+            UserRepository userRepository,
+            AlbumRatingRepository albumRatingRepository,
+            SongRatingRepository songRatingRepository,
+            AlbumReviewRepository albumReviewRepository,
+            AlbumFavoriteRepository albumFavoriteRepository,
+            AlbumListRepository albumListRepository,
+            UserFollowRepository userFollowRepository) {
+
         this.userRepository = userRepository;
+        this.albumRatingRepository = albumRatingRepository;
+        this.songRatingRepository = songRatingRepository;
+        this.albumReviewRepository = albumReviewRepository;
+        this.albumFavoriteRepository = albumFavoriteRepository;
+        this.albumListRepository = albumListRepository;
+        this.userFollowRepository = userFollowRepository;
     }
 
     public List<UserResponse> getAllUsers() {
@@ -97,6 +124,7 @@ public class UserService {
         return UserResponse.fromEntity(updatedUser);
     }
 
+    @Transactional
     public void deleteUser(Long id) {
 
         if (!userRepository.existsById(id)) {
@@ -104,6 +132,14 @@ public class UserService {
                     "User with id " + id + " not found"
             );
         }
+
+        albumRatingRepository.deleteByUserId(id);
+        songRatingRepository.deleteByUserId(id);
+        albumReviewRepository.deleteByUserId(id);
+        albumFavoriteRepository.deleteByUserId(id);
+        albumListRepository.deleteAll(albumListRepository.findByUserId(id));
+        userFollowRepository.deleteByFollowerId(id);
+        userFollowRepository.deleteByFollowedId(id);
 
         userRepository.deleteById(id);
     }
