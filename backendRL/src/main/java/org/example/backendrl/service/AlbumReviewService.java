@@ -2,6 +2,7 @@ package org.example.backendrl.service;
 
 import org.example.backendrl.dto.AlbumReviewRequest;
 import org.example.backendrl.dto.AlbumReviewResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.entity.Album;
 import org.example.backendrl.entity.AlbumReview;
 import org.example.backendrl.entity.User;
@@ -11,10 +12,13 @@ import org.example.backendrl.exception.UnprocessableEntityException;
 import org.example.backendrl.repository.AlbumRepository;
 import org.example.backendrl.repository.AlbumReviewRepository;
 import org.example.backendrl.repository.UserRepository;
+import org.example.backendrl.repository.spec.Specs;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @Service
 public class AlbumReviewService {
@@ -33,40 +37,71 @@ public class AlbumReviewService {
         this.userRepository = userRepository;
     }
 
-    public List<AlbumReviewResponse> getAllReviews() {
-
-        return albumReviewRepository.findAllByOrderByCreatedAtDesc()
-                .stream()
-                .map(AlbumReviewResponse::fromEntity)
-                .toList();
+    public PageResponse<AlbumReviewResponse> getAllReviews(
+            String title,
+            Long userId,
+            Long albumId,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
+        return searchReviews(title, userId, albumId, from, to, pageable);
     }
 
-    public List<AlbumReviewResponse> getReviewsForAlbum(Long albumId) {
-
+    public PageResponse<AlbumReviewResponse> getReviewsForAlbum(
+            Long albumId,
+            String title,
+            Long userId,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
         if (!albumRepository.existsById(albumId)) {
             throw new ResourceNotFoundException(
                     "Album with id " + albumId + " not found"
             );
         }
 
-        return albumReviewRepository.findByAlbumIdOrderByCreatedAtDesc(albumId)
-                .stream()
-                .map(AlbumReviewResponse::fromEntity)
-                .toList();
+        return searchReviews(title, userId, albumId, from, to, pageable);
     }
 
-    public List<AlbumReviewResponse> getReviewsForUser(Long userId) {
-
+    public PageResponse<AlbumReviewResponse> getReviewsForUser(
+            Long userId,
+            String title,
+            Long albumId,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException(
                     "User with id " + userId + " not found"
             );
         }
 
-        return albumReviewRepository.findByUserIdOrderByCreatedAtDesc(userId)
-                .stream()
-                .map(AlbumReviewResponse::fromEntity)
-                .toList();
+        return searchReviews(title, userId, albumId, from, to, pageable);
+    }
+
+    private PageResponse<AlbumReviewResponse> searchReviews(
+            String title,
+            Long userId,
+            Long albumId,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
+        Specification<AlbumReview> filter = Specs.all(
+                Specs.equal("user.id", userId),
+                Specs.equal("album.id", albumId),
+                Specs.contains("title", title),
+                Specs.onOrAfter("createdAt", from),
+                Specs.onOrBefore("createdAt", to)
+        );
+
+        return PageResponse.from(
+                albumReviewRepository.findAll(filter, pageable),
+                AlbumReviewResponse::fromEntity
+        );
     }
 
     public AlbumReviewResponse getReview(Long reviewId) {

@@ -1,6 +1,7 @@
 package org.example.backendrl.service;
 
 import org.example.backendrl.dto.AlbumFavoriteResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.entity.Album;
 import org.example.backendrl.entity.AlbumFavorite;
 import org.example.backendrl.entity.User;
@@ -9,10 +10,13 @@ import org.example.backendrl.exception.ResourceNotFoundException;
 import org.example.backendrl.repository.AlbumFavoriteRepository;
 import org.example.backendrl.repository.AlbumRepository;
 import org.example.backendrl.repository.UserRepository;
+import org.example.backendrl.repository.spec.Specs;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @Service
 public class AlbumFavoriteService {
@@ -31,18 +35,30 @@ public class AlbumFavoriteService {
         this.userRepository = userRepository;
     }
 
-    public List<AlbumFavoriteResponse> getFavoritesForUser(Long userId) {
-
+    public PageResponse<AlbumFavoriteResponse> getFavoritesForUser(
+            Long userId,
+            String albumTitle,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException(
                     "User with id " + userId + " not found"
             );
         }
 
-        return albumFavoriteRepository.findByUserIdOrderByCreatedAtDesc(userId)
-                .stream()
-                .map(AlbumFavoriteResponse::fromEntity)
-                .toList();
+        Specification<AlbumFavorite> filter = Specs.all(
+                Specs.equal("user.id", userId),
+                Specs.contains("album.title", albumTitle),
+                Specs.onOrAfter("createdAt", from),
+                Specs.onOrBefore("createdAt", to)
+        );
+
+        return PageResponse.from(
+                albumFavoriteRepository.findAll(filter, pageable),
+                AlbumFavoriteResponse::fromEntity
+        );
     }
 
     @Transactional

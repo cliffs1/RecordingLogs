@@ -1,6 +1,6 @@
 package org.example.backendrl.dto;
 
-public class ArtistResponse {
+public class ArtistResponse extends HypermediaResponse {
 
     private Long id;
     private String name;

@@ -2,6 +2,7 @@ package org.example.backendrl.service;
 
 import org.example.backendrl.dto.AlbumRatingRequest;
 import org.example.backendrl.dto.AlbumRatingResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.entity.Album;
 import org.example.backendrl.entity.AlbumRating;
 import org.example.backendrl.entity.User;
@@ -10,10 +11,13 @@ import org.example.backendrl.exception.ResourceNotFoundException;
 import org.example.backendrl.repository.AlbumRatingRepository;
 import org.example.backendrl.repository.AlbumRepository;
 import org.example.backendrl.repository.UserRepository;
+import org.example.backendrl.repository.spec.Specs;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @Service
 public class AlbumRatingService {
@@ -32,18 +36,21 @@ public class AlbumRatingService {
         this.userRepository = userRepository;
     }
 
-    public List<AlbumRatingResponse> getRatingsForAlbum(Long albumId) {
-
+    public PageResponse<AlbumRatingResponse> getRatingsForAlbum(
+            Long albumId,
+            Integer minRating,
+            Integer maxRating,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
         if (!albumRepository.existsById(albumId)) {
             throw new ResourceNotFoundException(
                     "Album with id " + albumId + " not found"
             );
         }
 
-        return albumRatingRepository.findByAlbumId(albumId)
-                .stream()
-                .map(AlbumRatingResponse::fromEntity)
-                .toList();
+        return searchRatings(null, albumId, minRating, maxRating, from, to, pageable);
     }
 
     public AlbumRatingResponse getRating(
@@ -151,17 +158,45 @@ public class AlbumRatingService {
         albumRatingRepository.delete(albumRating);
     }
 
-    public List<AlbumRatingResponse> getRatingsForUser(Long userId) {
-
+    public PageResponse<AlbumRatingResponse> getRatingsForUser(
+            Long userId,
+            Long albumId,
+            Integer minRating,
+            Integer maxRating,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException(
                     "User with id " + userId + " not found"
             );
         }
 
-        return albumRatingRepository.findByUserId(userId)
-                .stream()
-                .map(AlbumRatingResponse::fromEntity)
-                .toList();
+        return searchRatings(userId, albumId, minRating, maxRating, from, to, pageable);
+    }
+
+    private PageResponse<AlbumRatingResponse> searchRatings(
+            Long userId,
+            Long albumId,
+            Integer minRating,
+            Integer maxRating,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
+        Specification<AlbumRating> filter = Specs.all(
+                Specs.equal("user.id", userId),
+                Specs.equal("album.id", albumId),
+                Specs.atLeast("rating", minRating),
+                Specs.atMost("rating", maxRating),
+                Specs.onOrAfter("updatedAt", from),
+                Specs.onOrBefore("updatedAt", to)
+        );
+
+        return PageResponse.from(
+                albumRatingRepository.findAll(filter, pageable),
+                AlbumRatingResponse::fromEntity
+        );
     }
 }

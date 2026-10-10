@@ -1,6 +1,7 @@
 package org.example.backendrl.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDate;
 
@@ -11,6 +12,7 @@ public class AlbumRequest {
 
     private LocalDate releaseDate;
 
+    @URL(message = "Cover URL must be a valid URL")
     private String coverUrl;
 
     public AlbumRequest() {

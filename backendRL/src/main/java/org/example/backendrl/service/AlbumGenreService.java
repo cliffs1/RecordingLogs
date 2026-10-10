@@ -2,6 +2,7 @@ package org.example.backendrl.service;
 
 import org.example.backendrl.dto.AlbumSummaryResponse;
 import org.example.backendrl.dto.GenreResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.entity.Album;
 import org.example.backendrl.entity.AlbumGenre;
 import org.example.backendrl.entity.Genre;
@@ -10,10 +11,13 @@ import org.example.backendrl.exception.ResourceNotFoundException;
 import org.example.backendrl.repository.AlbumGenreRepository;
 import org.example.backendrl.repository.AlbumRepository;
 import org.example.backendrl.repository.GenreRepository;
+import org.example.backendrl.repository.spec.Specs;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @Service
 public class AlbumGenreService {
@@ -32,7 +36,11 @@ public class AlbumGenreService {
         this.genreRepository = genreRepository;
     }
 
-    public List<GenreResponse> getGenresForAlbum(Long albumId) {
+    public PageResponse<GenreResponse> getGenresForAlbum(
+            Long albumId,
+            String name,
+            Pageable pageable
+    ) {
 
         if (!albumRepository.existsById(albumId)) {
             throw new ResourceNotFoundException(
@@ -40,11 +48,15 @@ public class AlbumGenreService {
             );
         }
 
-        return albumGenreRepository.findByAlbumId(albumId)
-                .stream()
-                .map(AlbumGenre::getGenre)
-                .map(GenreResponse::fromEntity)
-                .toList();
+        Specification<AlbumGenre> filter = Specs.all(
+                Specs.equal("album.id", albumId),
+                Specs.contains("genre.name", name)
+        );
+
+        return PageResponse.from(
+                albumGenreRepository.findAll(filter, pageable),
+                albumGenre -> GenreResponse.fromEntity(albumGenre.getGenre())
+        );
     }
 
     public void addGenreToAlbum(Long albumId, Long genreId) {
@@ -102,7 +114,13 @@ public class AlbumGenreService {
         );
     }
 
-    public List<AlbumSummaryResponse> getAlbumsForGenre(Long genreId) {
+    public PageResponse<AlbumSummaryResponse> getAlbumsForGenre(
+            Long genreId,
+            String title,
+            LocalDate releasedFrom,
+            LocalDate releasedTo,
+            Pageable pageable
+    ) {
 
         if (!genreRepository.existsById(genreId)) {
             throw new ResourceNotFoundException(
@@ -110,10 +128,16 @@ public class AlbumGenreService {
             );
         }
 
-        return albumGenreRepository.findByGenreId(genreId)
-                .stream()
-                .map(AlbumGenre::getAlbum)
-                .map(AlbumSummaryResponse::fromEntity)
-                .toList();
+        Specification<AlbumGenre> filter = Specs.all(
+                Specs.equal("genre.id", genreId),
+                Specs.contains("album.title", title),
+                Specs.atLeast("album.releaseDate", releasedFrom),
+                Specs.atMost("album.releaseDate", releasedTo)
+        );
+
+        return PageResponse.from(
+                albumGenreRepository.findAll(filter, pageable),
+                albumGenre -> AlbumSummaryResponse.fromEntity(albumGenre.getAlbum())
+        );
     }
 }

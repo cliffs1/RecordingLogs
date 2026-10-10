@@ -1,6 +1,7 @@
 package org.example.backendrl.service;
 
 import org.example.backendrl.dto.ActivityResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.dto.UserFollowResponse;
 import org.example.backendrl.entity.User;
 import org.example.backendrl.entity.UserFollow;
@@ -12,17 +13,22 @@ import org.example.backendrl.repository.AlbumReviewRepository;
 import org.example.backendrl.repository.SongRatingRepository;
 import org.example.backendrl.repository.UserFollowRepository;
 import org.example.backendrl.repository.UserRepository;
+import org.example.backendrl.repository.spec.Specs;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 
 @Service
 public class UserFollowService {
-
-    private static final int FEED_LIMIT = 50;
 
     private final UserFollowRepository userFollowRepository;
     private final UserRepository userRepository;
@@ -44,30 +50,48 @@ public class UserFollowService {
         this.albumReviewRepository = albumReviewRepository;
     }
 
-    public List<UserFollowResponse> getFollowing(Long userId) {
+    public PageResponse<UserFollowResponse> getFollowing(
+            Long userId,
+            String username,
+            Pageable pageable
+    ) {
 
         checkUserExists(userId);
 
-        return userFollowRepository.findByFollowerId(userId)
-                .stream()
-                .map(follow -> UserFollowResponse.of(
+        Specification<UserFollow> filter = Specs.all(
+                Specs.equal("follower.id", userId),
+                Specs.contains("followed.username", username)
+        );
+
+        return PageResponse.from(
+                userFollowRepository.findAll(filter, pageable),
+                follow -> UserFollowResponse.of(
                         follow.getFollowed(),
                         follow.getCreatedAt()
-                ))
-                .toList();
+                )
+        );
     }
 
-    public List<UserFollowResponse> getFollowers(Long userId) {
+    public PageResponse<UserFollowResponse> getFollowers(
+            Long userId,
+            String username,
+            Pageable pageable
+    ) {
 
         checkUserExists(userId);
 
-        return userFollowRepository.findByFollowedId(userId)
-                .stream()
-                .map(follow -> UserFollowResponse.of(
+        Specification<UserFollow> filter = Specs.all(
+                Specs.equal("followed.id", userId),
+                Specs.contains("follower.username", username)
+        );
+
+        return PageResponse.from(
+                userFollowRepository.findAll(filter, pageable),
+                follow -> UserFollowResponse.of(
                         follow.getFollower(),
                         follow.getCreatedAt()
-                ))
-                .toList();
+                )
+        );
     }
 
     @Transactional
@@ -121,7 +145,18 @@ public class UserFollowService {
         userFollowRepository.delete(follow);
     }
 
-    public List<ActivityResponse> getFeed(Long userId) {
+    /**
+     * Activity of followed users, newest first. The feed merges three tables,
+     * so filtering and paging happen in memory after the merge.
+     */
+    public PageResponse<ActivityResponse> getFeed(
+            Long userId,
+            String type,
+            String username,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
 
         checkUserExists(userId);
 
@@ -130,50 +165,68 @@ public class UserFollowService {
                 .map(follow -> follow.getFollowed().getId())
                 .toList();
 
-        if (followedIds.isEmpty()) {
-            return List.of();
-        }
-
         List<ActivityResponse> activities = new ArrayList<>();
 
-        albumRatingRepository.findByUserIdInOrderByUpdatedAtDesc(followedIds)
-                .forEach(rating -> activities.add(new ActivityResponse(
-                        "ALBUM_RATING",
-                        rating.getUser().getId(),
-                        rating.getUser().getUsername(),
-                        rating.getAlbum().getId(),
-                        rating.getAlbum().getTitle(),
-                        String.valueOf(rating.getRating()),
-                        rating.getUpdatedAt()
-                )));
+        if (!followedIds.isEmpty()) {
 
-        songRatingRepository.findByUserIdInOrderByUpdatedAtDesc(followedIds)
-                .forEach(rating -> activities.add(new ActivityResponse(
-                        "SONG_RATING",
-                        rating.getUser().getId(),
-                        rating.getUser().getUsername(),
-                        rating.getSong().getId(),
-                        rating.getSong().getTitle(),
-                        String.valueOf(rating.getRating()),
-                        rating.getUpdatedAt()
-                )));
+            albumRatingRepository.findByUserIdInOrderByUpdatedAtDesc(followedIds)
+                    .forEach(rating -> activities.add(new ActivityResponse(
+                            "ALBUM_RATING",
+                            rating.getUser().getId(),
+                            rating.getUser().getUsername(),
+                            rating.getAlbum().getId(),
+                            rating.getAlbum().getTitle(),
+                            String.valueOf(rating.getRating()),
+                            rating.getUpdatedAt()
+                    )));
 
-        albumReviewRepository.findByUserIdInOrderByCreatedAtDesc(followedIds)
-                .forEach(review -> activities.add(new ActivityResponse(
-                        "ALBUM_REVIEW",
-                        review.getUser().getId(),
-                        review.getUser().getUsername(),
-                        review.getAlbum().getId(),
-                        review.getAlbum().getTitle(),
-                        review.getTitle(),
-                        review.getCreatedAt()
-                )));
+            songRatingRepository.findByUserIdInOrderByUpdatedAtDesc(followedIds)
+                    .forEach(rating -> activities.add(new ActivityResponse(
+                            "SONG_RATING",
+                            rating.getUser().getId(),
+                            rating.getUser().getUsername(),
+                            rating.getSong().getId(),
+                            rating.getSong().getTitle(),
+                            String.valueOf(rating.getRating()),
+                            rating.getUpdatedAt()
+                    )));
 
-        return activities.stream()
+            albumReviewRepository.findByUserIdInOrderByCreatedAtDesc(followedIds)
+                    .forEach(review -> activities.add(new ActivityResponse(
+                            "ALBUM_REVIEW",
+                            review.getUser().getId(),
+                            review.getUser().getUsername(),
+                            review.getAlbum().getId(),
+                            review.getAlbum().getTitle(),
+                            review.getTitle(),
+                            review.getCreatedAt()
+                    )));
+        }
+
+        List<ActivityResponse> filtered = activities.stream()
+                .filter(a -> type == null || type.isBlank()
+                        || a.getType().equalsIgnoreCase(type))
+                .filter(a -> username == null || username.isBlank()
+                        || a.getUsername().toLowerCase().contains(username.toLowerCase()))
+                .filter(a -> from == null
+                        || !a.getTimestamp().isBefore(from.atStartOfDay()))
+                .filter(a -> to == null
+                        || a.getTimestamp().isBefore(to.plusDays(1).atStartOfDay()))
                 .sorted(Comparator.comparing(ActivityResponse::getTimestamp)
                         .reversed())
-                .limit(FEED_LIMIT)
                 .toList();
+
+        int start = (int) Math.min(pageable.getOffset(), filtered.size());
+        int end = Math.min(start + pageable.getPageSize(), filtered.size());
+
+        return PageResponse.from(
+                new PageImpl<>(
+                        filtered.subList(start, end),
+                        PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()),
+                        filtered.size()
+                ),
+                Function.identity()
+        );
     }
 
     private User findUser(Long userId) {

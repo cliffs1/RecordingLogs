@@ -10,6 +10,8 @@ servers:
 tags:
 - name: Reviews
   description: Album reviews written by users
+- name: Songs
+  description: Songs (tracks) of an album
 - name: Genres
   description: Music genres
 - name: Favorites
@@ -18,8 +20,8 @@ tags:
   description: Ratings given to songs by users
 - name: Follows
   description: Following other users and their activity
-- name: Songs
-  description: Songs (tracks)
+- name: Charts
+  description: "Top-rated albums and songs, ranked by average user rating"
 - name: Artists
   description: Music artists
 - name: Lists
@@ -27,7 +29,7 @@ tags:
 - name: Album ratings
   description: Ratings given to albums by users
 - name: Albums
-  description: Music albums
+  description: Albums of an artist
 - name: Users
   description: Platform users
 paths:
@@ -45,16 +47,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -69,8 +71,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -102,16 +104,16 @@ paths:
               $ref: "#/components/schemas/UserRequest"
         required: true
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -126,8 +128,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -153,16 +155,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -177,8 +179,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -207,16 +209,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Rating not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Rating not found
           content:
             '*/*':
               schema:
@@ -231,8 +233,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -270,16 +272,16 @@ paths:
               $ref: "#/components/schemas/SongRatingRequest"
         required: true
       responses:
-        "404":
-          description: Rating not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Rating not found
           content:
             '*/*':
               schema:
@@ -294,8 +296,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -327,6 +329,14 @@ paths:
           type: integer
           format: int64
       responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
         "404":
           description: Rating not found
           content:
@@ -335,14 +345,6 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "409":
           description: Conflict
           content:
@@ -351,8 +353,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -361,162 +363,6 @@ paths:
                   type: string
         "204":
           description: Rating deleted
-  /api/songs/{id}:
-    get:
-      tags:
-      - Songs
-      summary: Get a song by id
-      operationId: getSong
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "404":
-          description: Song not found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Conflict
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "200":
-          description: Song found
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/SongResponse"
-    put:
-      tags:
-      - Songs
-      summary: Update a song
-      operationId: updateSong
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SongRequest"
-        required: true
-      responses:
-        "404":
-          description: Song not found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Conflict
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "200":
-          description: Song updated
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/SongResponse"
-    delete:
-      tags:
-      - Songs
-      summary: Delete a song
-      operationId: deleteSong
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "404":
-          description: Song not found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Conflict
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "204":
-          description: Song deleted
   /api/reviews/{reviewId}:
     get:
       tags:
@@ -531,16 +377,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Review not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Review not found
           content:
             '*/*':
               schema:
@@ -555,8 +401,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -588,16 +434,16 @@ paths:
               $ref: "#/components/schemas/AlbumReviewRequest"
         required: true
       responses:
-        "404":
-          description: Review not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: User is not the author of the review
+        "404":
+          description: Review not found
           content:
             '*/*':
               schema:
@@ -612,8 +458,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: User is not the author of the review
           content:
             '*/*':
               schema:
@@ -639,16 +485,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Review not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Review not found
           content:
             '*/*':
               schema:
@@ -663,8 +509,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -687,16 +533,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: List not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: List not found
           content:
             '*/*':
               schema:
@@ -711,8 +557,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -744,16 +590,16 @@ paths:
               $ref: "#/components/schemas/AlbumListRequest"
         required: true
       responses:
-        "404":
-          description: List not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: User is not the owner of the list
+        "404":
+          description: List not found
           content:
             '*/*':
               schema:
@@ -768,8 +614,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: User is not the owner of the list
           content:
             '*/*':
               schema:
@@ -795,16 +641,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: List not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: List not found
           content:
             '*/*':
               schema:
@@ -819,8 +665,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -843,16 +689,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Genre not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Genre not found
           content:
             '*/*':
               schema:
@@ -867,8 +713,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -900,16 +746,16 @@ paths:
               $ref: "#/components/schemas/GenreRequest"
         required: true
       responses:
-        "404":
-          description: Genre not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Genre not found
           content:
             '*/*':
               schema:
@@ -924,8 +770,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -951,16 +797,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Genre not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Genre not found
           content:
             '*/*':
               schema:
@@ -975,8 +821,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -999,16 +845,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Artist not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Artist not found
           content:
             '*/*':
               schema:
@@ -1023,8 +869,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1056,16 +902,16 @@ paths:
               $ref: "#/components/schemas/ArtistRequest"
         required: true
       responses:
-        "404":
-          description: Artist not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Artist not found
           content:
             '*/*':
               schema:
@@ -1080,8 +926,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1107,6 +953,14 @@ paths:
           type: integer
           format: int64
       responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
         "404":
           description: Artist not found
           content:
@@ -1115,14 +969,6 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "409":
           description: Conflict
           content:
@@ -1131,8 +977,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1141,13 +987,19 @@ paths:
                   type: string
         "204":
           description: Artist deleted
-  /api/albums/{id}:
+  /api/artists/{artistId}/albums/{id}:
     get:
       tags:
       - Albums
-      summary: Get an album by id
+      summary: Get an album of an artist
       operationId: getAlbum
       parameters:
+      - name: artistId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       - name: id
         in: path
         required: true
@@ -1155,16 +1007,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Album not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Artist or album not found
           content:
             '*/*':
               schema:
@@ -1179,8 +1031,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1196,9 +1048,15 @@ paths:
     put:
       tags:
       - Albums
-      summary: Update an album
+      summary: Update an album of an artist
       operationId: updateAlbum
       parameters:
+      - name: artistId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       - name: id
         in: path
         required: true
@@ -1212,16 +1070,16 @@ paths:
               $ref: "#/components/schemas/AlbumRequest"
         required: true
       responses:
-        "404":
-          description: Album not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Artist or album not found
           content:
             '*/*':
               schema:
@@ -1236,8 +1094,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1253,9 +1111,15 @@ paths:
     delete:
       tags:
       - Albums
-      summary: Delete an album
+      summary: Delete an album of an artist
       operationId: deleteAlbum
       parameters:
+      - name: artistId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       - name: id
         in: path
         required: true
@@ -1263,16 +1127,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Album not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Artist or album not found
           content:
             '*/*':
               schema:
@@ -1287,8 +1151,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1297,6 +1161,198 @@ paths:
                   type: string
         "204":
           description: Album deleted
+  /api/artists/{artistId}/albums/{albumId}/songs/{id}:
+    get:
+      tags:
+      - Songs
+      summary: Get a song of an album
+      operationId: getSong
+      parameters:
+      - name: artistId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: albumId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "404":
+          description: "Artist, album or song not found"
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "422":
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Song found
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SongResponse"
+    put:
+      tags:
+      - Songs
+      summary: Update a song of an album
+      operationId: updateSong
+      parameters:
+      - name: artistId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: albumId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SongRequest"
+        required: true
+      responses:
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "404":
+          description: "Artist, album or song not found"
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "422":
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Song updated
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SongResponse"
+    delete:
+      tags:
+      - Songs
+      summary: Delete a song of an album
+      operationId: deleteSong
+      parameters:
+      - name: artistId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: albumId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "404":
+          description: "Artist, album or song not found"
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "422":
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "204":
+          description: Song deleted
   /api/albums/{albumId}/ratings/{userId}:
     get:
       tags:
@@ -1317,16 +1373,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Rating not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Rating not found
           content:
             '*/*':
               schema:
@@ -1341,8 +1397,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1380,16 +1436,16 @@ paths:
               $ref: "#/components/schemas/AlbumRatingRequest"
         required: true
       responses:
-        "404":
-          description: Rating not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Rating not found
           content:
             '*/*':
               schema:
@@ -1404,8 +1460,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1437,16 +1493,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Rating not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Rating not found
           content:
             '*/*':
               schema:
@@ -1461,8 +1517,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1477,17 +1533,57 @@ paths:
       - Users
       summary: Get all users
       operationId: getAllUsers
+      parameters:
+      - name: username
+        in: query
+        description: Part of the username
+        required: false
+        schema:
+          type: string
+      - name: displayName
+        in: query
+        description: Part of the display name
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "username,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Not Found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Not Found
           content:
             '*/*':
               schema:
@@ -1502,8 +1598,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1515,9 +1611,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PageResponseUserResponse"
     post:
       tags:
       - Users
@@ -1530,16 +1624,16 @@ paths:
               $ref: "#/components/schemas/UserRequest"
         required: true
       responses:
-        "404":
-          description: Not Found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Not Found
           content:
             '*/*':
               schema:
@@ -1554,8 +1648,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1588,16 +1682,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: User cannot follow themselves
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -1612,8 +1706,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: User cannot follow themselves
           content:
             '*/*':
               schema:
@@ -1645,16 +1739,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: User does not follow the target
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User does not follow the target
           content:
             '*/*':
               schema:
@@ -1669,8 +1763,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1699,16 +1793,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: User or album not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User or album not found
           content:
             '*/*':
               schema:
@@ -1723,8 +1817,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1756,6 +1850,14 @@ paths:
           type: integer
           format: int64
       responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
         "404":
           description: Album is not a favorite of the user
           content:
@@ -1764,14 +1866,6 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "409":
           description: Conflict
           content:
@@ -1780,8 +1874,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1790,103 +1884,6 @@ paths:
                   type: string
         "204":
           description: Album removed from favorites
-  /api/songs:
-    get:
-      tags:
-      - Songs
-      summary: Get all songs
-      operationId: getAllSongs
-      responses:
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Conflict
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "200":
-          description: List of songs
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SongResponse"
-    post:
-      tags:
-      - Songs
-      summary: Create a song
-      operationId: createSong
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SongRequest"
-        required: true
-      responses:
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Conflict
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "201":
-          description: Song created
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/SongResponse"
   /api/songs/{songId}/ratings:
     get:
       tags:
@@ -1900,17 +1897,72 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: minRating
+        in: query
+        description: Minimum rating (1-10)
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: maxRating
+        in: query
+        description: Maximum rating (1-10)
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: from
+        in: query
+        description: Rated on or after this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Rated on or before this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "updatedAt,DESC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Song not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Song not found
           content:
             '*/*':
               schema:
@@ -1925,8 +1977,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -1938,9 +1990,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SongRatingResponse"
+                $ref: "#/components/schemas/PageResponseSongRatingResponse"
     post:
       tags:
       - Song ratings
@@ -1960,16 +2010,16 @@ paths:
               $ref: "#/components/schemas/SongRatingRequest"
         required: true
       responses:
-        "404":
-          description: Song or user not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Song or user not found
           content:
             '*/*':
               schema:
@@ -1984,8 +2034,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2018,16 +2068,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Song or genre not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Song or genre not found
           content:
             '*/*':
               schema:
@@ -2042,8 +2092,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2071,16 +2121,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: "Song, genre or link not found"
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: "Song, genre or link not found"
           content:
             '*/*':
               schema:
@@ -2095,8 +2145,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2111,17 +2161,58 @@ paths:
       - Lists
       summary: Get all album lists
       operationId: getAllLists
+      parameters:
+      - name: name
+        in: query
+        description: Part of the list name
+        required: false
+        schema:
+          type: string
+      - name: userId
+        in: query
+        description: Only lists of this user
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "id,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Not Found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Not Found
           content:
             '*/*':
               schema:
@@ -2136,8 +2227,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2149,9 +2240,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumListResponse"
+                $ref: "#/components/schemas/PageResponseAlbumListResponse"
     post:
       tags:
       - Lists
@@ -2164,16 +2253,16 @@ paths:
               $ref: "#/components/schemas/AlbumListRequest"
         required: true
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -2188,8 +2277,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2228,16 +2317,16 @@ paths:
               $ref: "#/components/schemas/AlbumListItemRequest"
         required: true
       responses:
-        "404":
-          description: List or album not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: User is not the owner of the list
+        "404":
+          description: List or album not found
           content:
             '*/*':
               schema:
@@ -2252,8 +2341,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: User is not the owner of the list
           content:
             '*/*':
               schema:
@@ -2285,16 +2374,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: List not found or album not in list
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: List not found or album not in list
           content:
             '*/*':
               schema:
@@ -2309,8 +2398,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2325,17 +2414,51 @@ paths:
       - Genres
       summary: Get all genres
       operationId: getAllGenres
+      parameters:
+      - name: name
+        in: query
+        description: Part of the genre name
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "name,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Not Found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Not Found
           content:
             '*/*':
               schema:
@@ -2350,8 +2473,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2363,9 +2486,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/GenreResponse"
+                $ref: "#/components/schemas/PageResponseGenreResponse"
     post:
       tags:
       - Genres
@@ -2378,16 +2499,16 @@ paths:
               $ref: "#/components/schemas/GenreRequest"
         required: true
       responses:
-        "404":
-          description: Not Found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Not Found
           content:
             '*/*':
               schema:
@@ -2402,8 +2523,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2420,19 +2541,59 @@ paths:
     get:
       tags:
       - Artists
-      summary: Get all artists
-      operationId: getAllArtists
+      summary: "Get artists (paged, filterable)"
+      operationId: getArtists
+      parameters:
+      - name: name
+        in: query
+        description: Part of the artist name (case-insensitive)
+        required: false
+        schema:
+          type: string
+      - name: genre
+        in: query
+        description: "Genre name, e.g. Rock"
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "name,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Not Found
+        "400":
+          description: Invalid paging or sort parameter
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Not Found
           content:
             '*/*':
               schema:
@@ -2447,8 +2608,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2456,13 +2617,11 @@ paths:
                 additionalProperties:
                   type: string
         "200":
-          description: List of artists
+          description: Page of artists
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ArtistResponse"
+                $ref: "#/components/schemas/PageResponseArtistResponse"
     post:
       tags:
       - Artists
@@ -2475,16 +2634,16 @@ paths:
               $ref: "#/components/schemas/ArtistRequest"
         required: true
       responses:
-        "404":
-          description: Not Found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Not Found
           content:
             '*/*':
               schema:
@@ -2499,8 +2658,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2513,113 +2672,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ArtistResponse"
-  /api/artists/{artistId}/songs/{songId}:
-    post:
-      tags:
-      - Artists
-      summary: Add a song to an artist
-      operationId: addSongToArtist
-      parameters:
-      - name: artistId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      - name: songId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "404":
-          description: Artist or song not found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Song is already linked to this artist
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "201":
-          description: Song added to artist
-    delete:
-      tags:
-      - Artists
-      summary: Remove a song from an artist
-      operationId: removeSongFromArtist
-      parameters:
-      - name: artistId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      - name: songId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "404":
-          description: "Artist, song or link not found"
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Conflict
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "204":
-          description: Song removed from artist
   /api/artists/{artistId}/genres/{genreId}:
     post:
       tags:
@@ -2640,16 +2692,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Artist or genre not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Artist or genre not found
           content:
             '*/*':
               schema:
@@ -2664,8 +2716,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2693,6 +2745,14 @@ paths:
           type: integer
           format: int64
       responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
         "404":
           description: "Artist, genre or link not found"
           content:
@@ -2701,14 +2761,6 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "409":
           description: Conflict
           content:
@@ -2717,8 +2769,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2727,23 +2779,83 @@ paths:
                   type: string
         "204":
           description: Genre removed from artist
-  /api/albums:
+  /api/artists/{artistId}/albums:
     get:
       tags:
       - Albums
-      summary: Get all albums
-      operationId: getAllAlbums
+      summary: "Get albums of an artist (paged, filterable)"
+      operationId: getAlbums
+      parameters:
+      - name: artistId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: title
+        in: query
+        description: Part of the album title (case-insensitive)
+        required: false
+        schema:
+          type: string
+      - name: releasedFrom
+        in: query
+        description: Released on or after this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: releasedTo
+        in: query
+        description: Released on or before this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: genre
+        in: query
+        description: "Genre name, e.g. Rock"
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "releaseDate,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Not Found
+        "400":
+          description: "Invalid filter, paging or sort parameter"
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Artist not found
           content:
             '*/*':
               schema:
@@ -2758,8 +2870,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2767,18 +2879,23 @@ paths:
                 additionalProperties:
                   type: string
         "200":
-          description: List of albums
+          description: Page of albums
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumResponse"
+                $ref: "#/components/schemas/PageResponseAlbumResponse"
     post:
       tags:
       - Albums
-      summary: Create an album
+      summary: Create an album for an artist
       operationId: createAlbum
+      parameters:
+      - name: artistId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       requestBody:
         content:
           application/json:
@@ -2786,16 +2903,16 @@ paths:
               $ref: "#/components/schemas/AlbumRequest"
         required: true
       responses:
-        "404":
-          description: Not Found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Artist not found
           content:
             '*/*':
               schema:
@@ -2810,8 +2927,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2824,95 +2941,91 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/AlbumResponse"
-  /api/albums/{albumId}/songs/{songId}:
-    post:
+  /api/artists/{artistId}/albums/{albumId}/songs:
+    get:
       tags:
-      - Albums
-      summary: Add a song to an album's tracklist
-      operationId: addSongToAlbum
+      - Songs
+      summary: "Get songs of an album (paged, filterable)"
+      operationId: getSongs
       parameters:
+      - name: artistId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       - name: albumId
         in: path
         required: true
         schema:
           type: integer
           format: int64
-      - name: songId
-        in: path
-        required: true
+      - name: title
+        in: query
+        description: Part of the song title (case-insensitive)
+        required: false
+        schema:
+          type: string
+      - name: minDuration
+        in: query
+        description: Minimum duration in seconds
+        required: false
         schema:
           type: integer
-          format: int64
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AlbumSongRequest"
-        required: true
+          format: int32
+      - name: maxDuration
+        in: query
+        description: Maximum duration in seconds
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: disc
+        in: query
+        description: Disc number
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "discNumber,ASC"
+          - "trackNumber,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Album or song not found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Song is already on this album
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "400":
-          description: Invalid request body
+          description: "Invalid filter, paging or sort parameter"
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "201":
-          description: Song added to album
-    delete:
-      tags:
-      - Albums
-      summary: Remove a song from an album's tracklist
-      operationId: removeSongFromAlbum
-      parameters:
-      - name: albumId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      - name: songId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
         "404":
-          description: "Album, song or link not found"
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
+          description: Artist or album not found
           content:
             '*/*':
               schema:
@@ -2927,16 +3040,83 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "204":
-          description: Song removed from album
+        "200":
+          description: Page of songs
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseSongResponse"
+    post:
+      tags:
+      - Songs
+      summary: Create a song in an album
+      operationId: createSong
+      parameters:
+      - name: artistId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: albumId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SongRequest"
+        required: true
+      responses:
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "404":
+          description: Artist or album not found
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "422":
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "201":
+          description: Song created
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SongResponse"
   /api/albums/{albumId}/reviews:
     get:
       tags:
@@ -2950,17 +3130,71 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: title
+        in: query
+        description: Part of the review title
+        required: false
+        schema:
+          type: string
+      - name: userId
+        in: query
+        description: Only reviews by this user
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: from
+        in: query
+        description: Written on or after this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Written on or before this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "createdAt,DESC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Album not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Album not found
           content:
             '*/*':
               schema:
@@ -2975,8 +3209,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -2988,9 +3222,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumReviewResponse"
+                $ref: "#/components/schemas/PageResponseAlbumReviewResponse"
     post:
       tags:
       - Reviews
@@ -3010,16 +3242,16 @@ paths:
               $ref: "#/components/schemas/AlbumReviewRequest"
         required: true
       responses:
-        "404":
-          description: Album or user not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Album or user not found
           content:
             '*/*':
               schema:
@@ -3034,8 +3266,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3061,17 +3293,72 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: minRating
+        in: query
+        description: Minimum rating (1-10)
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: maxRating
+        in: query
+        description: Maximum rating (1-10)
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: from
+        in: query
+        description: Rated on or after this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Rated on or before this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "updatedAt,DESC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Album not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Album not found
           content:
             '*/*':
               schema:
@@ -3086,8 +3373,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3099,9 +3386,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumRatingResponse"
+                $ref: "#/components/schemas/PageResponseAlbumRatingResponse"
     post:
       tags:
       - Album ratings
@@ -3121,16 +3406,16 @@ paths:
               $ref: "#/components/schemas/AlbumRatingRequest"
         required: true
       responses:
-        "404":
-          description: Album or user not found
+        "400":
+          description: Invalid request body
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Album or user not found
           content:
             '*/*':
               schema:
@@ -3145,8 +3430,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Invalid request body
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3179,16 +3464,16 @@ paths:
           type: integer
           format: int64
       responses:
-        "404":
-          description: Album or genre not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Album or genre not found
           content:
             '*/*':
               schema:
@@ -3203,8 +3488,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3232,6 +3517,14 @@ paths:
           type: integer
           format: int64
       responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
         "404":
           description: "Album, genre or link not found"
           content:
@@ -3240,14 +3533,6 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "409":
           description: Conflict
           content:
@@ -3256,8 +3541,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3266,113 +3551,6 @@ paths:
                   type: string
         "204":
           description: Genre removed from album
-  /api/albums/{albumId}/artists/{artistId}:
-    post:
-      tags:
-      - Albums
-      summary: Add an artist to an album
-      operationId: addArtistToAlbum
-      parameters:
-      - name: albumId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      - name: artistId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "404":
-          description: Album or artist not found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Artist is already on this album
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "201":
-          description: Artist added to album
-    delete:
-      tags:
-      - Albums
-      summary: Remove an artist from an album
-      operationId: removeArtistFromAlbum
-      parameters:
-      - name: albumId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      - name: artistId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "404":
-          description: "Album, artist or link not found"
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Conflict
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "204":
-          description: Artist removed from album
   /api/users/{userId}/song-ratings:
     get:
       tags:
@@ -3386,17 +3564,79 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: songId
+        in: query
+        description: Only ratings of this song
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: minRating
+        in: query
+        description: Minimum rating (1-10)
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: maxRating
+        in: query
+        description: Maximum rating (1-10)
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: from
+        in: query
+        description: Rated on or after this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Rated on or before this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "updatedAt,DESC"
+          items:
+            type: string
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -3411,8 +3651,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3424,9 +3664,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SongRatingResponse"
+                $ref: "#/components/schemas/PageResponseSongRatingResponse"
   /api/users/{userId}/reviews:
     get:
       tags:
@@ -3440,17 +3678,71 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: title
+        in: query
+        description: Part of the review title
+        required: false
+        schema:
+          type: string
+      - name: albumId
+        in: query
+        description: Only reviews of this album
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: from
+        in: query
+        description: Written on or after this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Written on or before this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "createdAt,DESC"
+          items:
+            type: string
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -3465,8 +3757,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3478,9 +3770,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumReviewResponse"
+                $ref: "#/components/schemas/PageResponseAlbumReviewResponse"
   /api/users/{userId}/ratings:
     get:
       tags:
@@ -3494,17 +3784,79 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: albumId
+        in: query
+        description: Only ratings of this album
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: minRating
+        in: query
+        description: Minimum rating (1-10)
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: maxRating
+        in: query
+        description: Maximum rating (1-10)
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: from
+        in: query
+        description: Rated on or after this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Rated on or before this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "updatedAt,DESC"
+          items:
+            type: string
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -3519,8 +3871,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3532,9 +3884,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumRatingResponse"
+                $ref: "#/components/schemas/PageResponseAlbumRatingResponse"
   /api/users/{userId}/lists:
     get:
       tags:
@@ -3548,17 +3898,50 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: name
+        in: query
+        description: Part of the list name
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "id,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -3573,8 +3956,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3586,9 +3969,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumListResponse"
+                $ref: "#/components/schemas/PageResponseAlbumListResponse"
   /api/users/{userId}/following:
     get:
       tags:
@@ -3602,17 +3983,50 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: username
+        in: query
+        description: Part of the followed user's username
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "createdAt,DESC"
+          items:
+            type: string
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -3627,8 +4041,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3640,9 +4054,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/UserFollowResponse"
+                $ref: "#/components/schemas/PageResponseUserFollowResponse"
   /api/users/{userId}/followers:
     get:
       tags:
@@ -3656,17 +4068,50 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: username
+        in: query
+        description: Part of the follower's username
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "createdAt,DESC"
+          items:
+            type: string
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -3681,8 +4126,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3694,9 +4139,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/UserFollowResponse"
+                $ref: "#/components/schemas/PageResponseUserFollowResponse"
   /api/users/{userId}/feed:
     get:
       tags:
@@ -3710,17 +4153,68 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: type
+        in: query
+        description: "Activity type: ALBUM_RATING, SONG_RATING or ALBUM_REVIEW"
+        required: false
+        schema:
+          type: string
+      - name: username
+        in: query
+        description: Part of the username of the followed user
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        description: Happened on or after this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Happened on or before this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -3735,8 +4229,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3748,9 +4242,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ActivityResponse"
+                $ref: "#/components/schemas/PageResponseActivityResponse"
   /api/users/{userId}/favorites:
     get:
       tags:
@@ -3764,17 +4256,64 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: albumTitle
+        in: query
+        description: Part of the album title
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        description: Favorited on or after this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Favorited on or before this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "createdAt,DESC"
+          items:
+            type: string
       responses:
-        "404":
-          description: User not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: User not found
           content:
             '*/*':
               schema:
@@ -3789,8 +4328,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3802,9 +4341,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumFavoriteResponse"
+                $ref: "#/components/schemas/PageResponseAlbumFavoriteResponse"
   /api/songs/{songId}/genres:
     get:
       tags:
@@ -3818,17 +4355,50 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: name
+        in: query
+        description: Part of the genre name
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "genre.name,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Song not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Song not found
           content:
             '*/*':
               schema:
@@ -3843,8 +4413,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -3856,124 +4426,84 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Genre"
-  /api/songs/{songId}/artists:
-    get:
-      tags:
-      - Songs
-      summary: Get all artists of a song
-      operationId: getArtistsForSong
-      parameters:
-      - name: songId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "404":
-          description: Song not found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Conflict
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "200":
-          description: List of artists
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ArtistSummaryResponse"
-  /api/songs/{songId}/albums:
-    get:
-      tags:
-      - Songs
-      summary: Get all albums containing a song
-      operationId: getAlbumsForSong
-      parameters:
-      - name: songId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "404":
-          description: Song not found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Conflict
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "200":
-          description: List of albums
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumSummaryResponse"
+                $ref: "#/components/schemas/PageResponseGenreResponse"
   /api/reviews:
     get:
       tags:
       - Reviews
       summary: "Get all reviews, newest first"
       operationId: getAllReviews
+      parameters:
+      - name: title
+        in: query
+        description: Part of the review title
+        required: false
+        schema:
+          type: string
+      - name: userId
+        in: query
+        description: Only reviews by this user
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: albumId
+        in: query
+        description: Only reviews of this album
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: from
+        in: query
+        description: Written on or after this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Written on or before this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "createdAt,DESC"
+          items:
+            type: string
       responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
         "404":
           description: Not Found
           content:
@@ -3982,14 +4512,6 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "409":
           description: Conflict
           content:
@@ -3998,8 +4520,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -4011,9 +4533,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumReviewResponse"
+                $ref: "#/components/schemas/PageResponseAlbumReviewResponse"
   /api/genres/{genreId}/songs:
     get:
       tags:
@@ -4027,17 +4547,64 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: title
+        in: query
+        description: Part of the song title
+        required: false
+        schema:
+          type: string
+      - name: minDuration
+        in: query
+        description: Minimum duration in seconds
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: maxDuration
+        in: query
+        description: Maximum duration in seconds
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "song.title,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Genre not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Genre not found
           content:
             '*/*':
               schema:
@@ -4052,8 +4619,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -4065,9 +4632,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SongSummaryResponse"
+                $ref: "#/components/schemas/PageResponseSongSummaryResponse"
   /api/genres/{genreId}/artists:
     get:
       tags:
@@ -4081,17 +4646,50 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: name
+        in: query
+        description: Part of the artist name
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "artist.name,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Genre not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Genre not found
           content:
             '*/*':
               schema:
@@ -4106,8 +4704,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -4119,9 +4717,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ArtistSummaryResponse"
+                $ref: "#/components/schemas/PageResponseArtistSummaryResponse"
   /api/genres/{genreId}/albums:
     get:
       tags:
@@ -4135,17 +4731,64 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: title
+        in: query
+        description: Part of the album title
+        required: false
+        schema:
+          type: string
+      - name: releasedFrom
+        in: query
+        description: Released on or after this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: releasedTo
+        in: query
+        description: Released on or before this date (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "album.title,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Genre not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Genre not found
           content:
             '*/*':
               schema:
@@ -4160,8 +4803,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -4173,33 +4816,80 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumSummaryResponse"
-  /api/artists/{artistId}/songs:
+                $ref: "#/components/schemas/PageResponseAlbumSummaryResponse"
+  /api/charts/top-songs:
     get:
       tags:
-      - Artists
-      summary: Get all songs of an artist
-      operationId: getSongsForArtist
+      - Charts
+      summary: Top-rated songs
+      description: "Ranked by average rating, ties broken by number of ratings. The\
+        \ order is fixed, so the sort parameter is ignored."
+      operationId: getTopSongs
       parameters:
+      - name: genre
+        in: query
+        description: "Genre name, e.g. Rock"
+        required: false
+        schema:
+          type: string
+      - name: year
+        in: query
+        description: Release year of the song's album
+        required: false
+        schema:
+          type: integer
+          format: int32
       - name: artistId
-        in: path
-        required: true
+        in: query
+        description: Only songs of this artist
+        required: false
         schema:
           type: integer
           format: int64
+      - name: minRatings
+        in: query
+        description: Minimum number of ratings a song needs
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 10
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
       responses:
-        "404":
-          description: Artist not found
+        "400":
+          description: Invalid parameter
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Not Found
           content:
             '*/*':
               schema:
@@ -4214,8 +4904,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -4223,13 +4913,112 @@ paths:
                 additionalProperties:
                   type: string
         "200":
-          description: List of songs
+          description: Page of chart entries
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SongSummaryResponse"
+                $ref: "#/components/schemas/PageResponseTopSongResponse"
+  /api/charts/top-albums:
+    get:
+      tags:
+      - Charts
+      summary: Top-rated albums
+      description: "Ranked by average rating, ties broken by number of ratings. The\
+        \ order is fixed, so the sort parameter is ignored."
+      operationId: getTopAlbums
+      parameters:
+      - name: genre
+        in: query
+        description: "Genre name, e.g. Rock"
+        required: false
+        schema:
+          type: string
+      - name: year
+        in: query
+        description: Album release year
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: artistId
+        in: query
+        description: Only albums of this artist
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: minRatings
+        in: query
+        description: Minimum number of ratings an album needs
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 10
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        "400":
+          description: Invalid parameter
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "422":
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Page of chart entries
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseTopAlbumResponse"
   /api/artists/{artistId}/genres:
     get:
       tags:
@@ -4243,17 +5032,50 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: name
+        in: query
+        description: Part of the genre name
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "genre.name,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Artist not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Artist not found
           content:
             '*/*':
               schema:
@@ -4268,8 +5090,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -4281,117 +5103,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/GenreResponse"
-  /api/artists/{artistId}/albums:
-    get:
-      tags:
-      - Artists
-      summary: Get all albums of an artist
-      operationId: getAlbumsForArtist
-      parameters:
-      - name: artistId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "404":
-          description: Artist not found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Conflict
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "200":
-          description: List of albums
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumSummaryResponse"
-  /api/albums/{albumId}/songs:
-    get:
-      tags:
-      - Albums
-      summary: Get the tracklist of an album
-      operationId: getSongsForAlbum
-      parameters:
-      - name: albumId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "404":
-          description: Album not found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Conflict
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "200":
-          description: List of songs
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AlbumSongResponse"
+                $ref: "#/components/schemas/PageResponseGenreResponse"
   /api/albums/{albumId}/genres:
     get:
       tags:
@@ -4405,17 +5117,50 @@ paths:
         schema:
           type: integer
           format: int64
+      - name: name
+        in: query
+        description: Part of the genre name
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "genre.name,ASC"
+          items:
+            type: string
       responses:
-        "404":
-          description: Album not found
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
+        "404":
+          description: Album not found
           content:
             '*/*':
               schema:
@@ -4430,8 +5175,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "400":
-          description: Bad Request
+        "422":
+          description: Unprocessable Content
           content:
             '*/*':
               schema:
@@ -4443,63 +5188,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/GenreResponse"
-  /api/albums/{albumId}/artists:
-    get:
-      tags:
-      - Albums
-      summary: Get all artists of an album
-      operationId: getArtistsForAlbum
-      parameters:
-      - name: albumId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "404":
-          description: Album not found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Conflict
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "200":
-          description: List of artists
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ArtistSummaryResponse"
+                $ref: "#/components/schemas/PageResponseGenreResponse"
 components:
   schemas:
     UserRequest:
@@ -4572,34 +5261,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-    SongRequest:
-      type: object
-      properties:
-        title:
-          type: string
-          minLength: 1
-        durationSeconds:
-          type: integer
-          format: int32
-        originalReleaseDate:
-          type: string
-          format: date
-      required:
-      - title
-    SongResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        title:
-          type: string
-        durationSeconds:
-          type: integer
-          format: int32
-        originalReleaseDate:
-          type: string
-          format: date
     AlbumReviewRequest:
       type: object
       properties:
@@ -4735,6 +5396,15 @@ components:
           type: string
         biography:
           type: string
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
     AlbumRequest:
       type: object
       properties:
@@ -4754,6 +5424,9 @@ components:
         id:
           type: integer
           format: int64
+        artistId:
+          type: integer
+          format: int64
         title:
           type: string
         releaseDate:
@@ -4761,6 +5434,60 @@ components:
           format: date
         coverUrl:
           type: string
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    SongRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        durationSeconds:
+          type: integer
+          format: int32
+        originalReleaseDate:
+          type: string
+          format: date
+        trackNumber:
+          type: integer
+          format: int32
+          exclusiveMinimum: 0
+        discNumber:
+          type: integer
+          format: int32
+          exclusiveMinimum: 0
+      required:
+      - title
+      - trackNumber
+    SongResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        albumId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        durationSeconds:
+          type: integer
+          format: int32
+        originalReleaseDate:
+          type: string
+          format: date
+        trackNumber:
+          type: integer
+          format: int32
+        discNumber:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
     AlbumRatingRequest:
       type: object
       properties:
@@ -4842,19 +5569,144 @@ components:
           minimum: 1
       required:
       - userId
-    AlbumSongRequest:
+    PageResponseUserResponse:
       type: object
       properties:
-        trackNumber:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserResponse"
+        page:
           type: integer
           format: int32
-          minimum: 1
-        discNumber:
+        size:
           type: integer
           format: int32
-          minimum: 1
-      required:
-      - trackNumber
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseSongRatingResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/SongRatingResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseAlbumReviewResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlbumReviewResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseAlbumRatingResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlbumRatingResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseAlbumListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlbumListResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseUserFollowResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserFollowResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
     ActivityResponse:
       type: object
       properties:
@@ -4875,35 +5727,98 @@ components:
         timestamp:
           type: string
           format: date-time
-    Genre:
+    PageResponseActivityResponse:
       type: object
       properties:
-        id:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
           type: integer
           format: int64
-        name:
-          type: string
-    ArtistSummaryResponse:
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseAlbumFavoriteResponse:
       type: object
       properties:
-        id:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlbumFavoriteResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
           type: integer
           format: int64
-        name:
-          type: string
-    AlbumSummaryResponse:
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseGenreResponse:
       type: object
       properties:
-        id:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/GenreResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
           type: integer
           format: int64
-        title:
-          type: string
-        releaseDate:
-          type: string
-          format: date
-        coverUrl:
-          type: string
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseSongSummaryResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/SongSummaryResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
     SongSummaryResponse:
       type: object
       properties:
@@ -4918,23 +5833,252 @@ components:
         originalReleaseDate:
           type: string
           format: date
-    AlbumSongResponse:
+    ArtistSummaryResponse:
       type: object
       properties:
         id:
           type: integer
           format: int64
-        albumId:
+        name:
+          type: string
+    PageResponseArtistSummaryResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArtistSummaryResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    AlbumSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        releaseDate:
+          type: string
+          format: date
+        coverUrl:
+          type: string
+    PageResponseAlbumSummaryResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlbumSummaryResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseTopSongResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopSongResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    TopSongResponse:
+      type: object
+      properties:
+        rank:
+          type: integer
+          format: int32
         songId:
           type: integer
           format: int64
-        songTitle:
+        title:
           type: string
-        trackNumber:
+        durationSeconds:
           type: integer
           format: int32
-        discNumber:
+        albumId:
+          type: integer
+          format: int64
+        albumTitle:
+          type: string
+        coverUrl:
+          type: string
+        artistId:
+          type: integer
+          format: int64
+        artistName:
+          type: string
+        averageRating:
+          type: number
+          format: double
+        ratingCount:
+          type: integer
+          format: int64
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseTopAlbumResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopAlbumResponse"
+        page:
           type: integer
           format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    TopAlbumResponse:
+      type: object
+      properties:
+        rank:
+          type: integer
+          format: int32
+        albumId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        releaseDate:
+          type: string
+          format: date
+        coverUrl:
+          type: string
+        artistId:
+          type: integer
+          format: int64
+        artistName:
+          type: string
+        averageRating:
+          type: number
+          format: double
+        ratingCount:
+          type: integer
+          format: int64
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseArtistResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArtistResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseAlbumResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlbumResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"
+    PageResponseSongResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/SongResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        _links:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Link"

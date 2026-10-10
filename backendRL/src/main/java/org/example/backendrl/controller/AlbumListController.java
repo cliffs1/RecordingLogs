@@ -1,6 +1,7 @@
 package org.example.backendrl.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,9 +9,14 @@ import jakarta.validation.Valid;
 import org.example.backendrl.dto.AlbumListItemRequest;
 import org.example.backendrl.dto.AlbumListRequest;
 import org.example.backendrl.dto.AlbumListResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.service.AlbumListService;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -28,8 +34,14 @@ public class AlbumListController {
     @GetMapping("/lists")
     @Operation(summary = "Get all album lists")
     @ApiResponse(responseCode = "200", description = "List of album lists")
-    public List<AlbumListResponse> getAllLists() {
-        return albumListService.getAllLists();
+    public PageResponse<AlbumListResponse> getAllLists(
+            @Parameter(description = "Part of the list name")
+            @RequestParam(required = false) String name,
+            @Parameter(description = "Only lists of this user")
+            @RequestParam(required = false) Long userId,
+            @ParameterObject @PageableDefault(size = 20, sort = "id") Pageable pageable
+    ) {
+        return albumListService.getAllLists(name, userId, pageable);
     }
 
     @GetMapping("/lists/{listId}")
@@ -48,8 +60,13 @@ public class AlbumListController {
             @ApiResponse(responseCode = "200", description = "List of album lists"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public List<AlbumListResponse> getListsForUser(@PathVariable Long userId) {
-        return albumListService.getListsForUser(userId);
+    public PageResponse<AlbumListResponse> getListsForUser(
+            @PathVariable Long userId,
+            @Parameter(description = "Part of the list name")
+            @RequestParam(required = false) String name,
+            @ParameterObject @PageableDefault(size = 20, sort = "id") Pageable pageable
+    ) {
+        return albumListService.getListsForUser(userId, name, pageable);
     }
 
     @PostMapping("/lists")

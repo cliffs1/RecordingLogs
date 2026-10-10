@@ -3,6 +3,7 @@ package org.example.backendrl.service;
 import org.example.backendrl.dto.AlbumListItemRequest;
 import org.example.backendrl.dto.AlbumListRequest;
 import org.example.backendrl.dto.AlbumListResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.entity.Album;
 import org.example.backendrl.entity.AlbumList;
 import org.example.backendrl.entity.AlbumListItem;
@@ -13,6 +14,9 @@ import org.example.backendrl.exception.UnprocessableEntityException;
 import org.example.backendrl.repository.AlbumListRepository;
 import org.example.backendrl.repository.AlbumRepository;
 import org.example.backendrl.repository.UserRepository;
+import org.example.backendrl.repository.spec.Specs;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,27 +41,43 @@ public class AlbumListService {
     }
 
     @Transactional(readOnly = true)
-    public List<AlbumListResponse> getAllLists() {
-
-        return albumListRepository.findAll()
-                .stream()
-                .map(AlbumListResponse::fromEntity)
-                .toList();
+    public PageResponse<AlbumListResponse> getAllLists(
+            String name,
+            Long userId,
+            Pageable pageable
+    ) {
+        return searchLists(name, userId, pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<AlbumListResponse> getListsForUser(Long userId) {
-
+    public PageResponse<AlbumListResponse> getListsForUser(
+            Long userId,
+            String name,
+            Pageable pageable
+    ) {
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException(
                     "User with id " + userId + " not found"
             );
         }
 
-        return albumListRepository.findByUserId(userId)
-                .stream()
-                .map(AlbumListResponse::fromEntity)
-                .toList();
+        return searchLists(name, userId, pageable);
+    }
+
+    private PageResponse<AlbumListResponse> searchLists(
+            String name,
+            Long userId,
+            Pageable pageable
+    ) {
+        Specification<AlbumList> filter = Specs.all(
+                Specs.equal("user.id", userId),
+                Specs.contains("name", name)
+        );
+
+        return PageResponse.from(
+                albumListRepository.findAll(filter, pageable),
+                AlbumListResponse::fromEntity
+        );
     }
 
     @Transactional(readOnly = true)

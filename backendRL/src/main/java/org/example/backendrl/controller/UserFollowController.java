@@ -1,15 +1,24 @@
 package org.example.backendrl.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.backendrl.dto.ActivityResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.dto.UserFollowResponse;
 import org.example.backendrl.service.UserFollowService;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -29,8 +38,13 @@ public class UserFollowController {
             @ApiResponse(responseCode = "200", description = "List of followed users"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public List<UserFollowResponse> getFollowing(@PathVariable Long userId) {
-        return userFollowService.getFollowing(userId);
+    public PageResponse<UserFollowResponse> getFollowing(
+            @PathVariable Long userId,
+            @Parameter(description = "Part of the followed user's username")
+            @RequestParam(required = false) String username,
+            @ParameterObject @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return userFollowService.getFollowing(userId, username, pageable);
     }
 
     @GetMapping("/{userId}/followers")
@@ -39,8 +53,13 @@ public class UserFollowController {
             @ApiResponse(responseCode = "200", description = "List of followers"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public List<UserFollowResponse> getFollowers(@PathVariable Long userId) {
-        return userFollowService.getFollowers(userId);
+    public PageResponse<UserFollowResponse> getFollowers(
+            @PathVariable Long userId,
+            @Parameter(description = "Part of the follower's username")
+            @RequestParam(required = false) String username,
+            @ParameterObject @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return userFollowService.getFollowers(userId, username, pageable);
     }
 
     @PostMapping("/{userId}/following/{targetId}")
@@ -79,7 +98,18 @@ public class UserFollowController {
             @ApiResponse(responseCode = "200", description = "Ratings and reviews of followed users, newest first"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public List<ActivityResponse> getFeed(@PathVariable Long userId) {
-        return userFollowService.getFeed(userId);
+    public PageResponse<ActivityResponse> getFeed(
+            @PathVariable Long userId,
+            @Parameter(description = "Activity type: ALBUM_RATING, SONG_RATING or ALBUM_REVIEW")
+            @RequestParam(required = false) String type,
+            @Parameter(description = "Part of the username of the followed user")
+            @RequestParam(required = false) String username,
+            @Parameter(description = "Happened on or after this date (yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "Happened on or before this date (yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @ParameterObject @PageableDefault(size = 20) Pageable pageable
+    ) {
+        return userFollowService.getFeed(userId, type, username, from, to, pageable);
     }
 }

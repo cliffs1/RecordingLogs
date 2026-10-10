@@ -2,6 +2,7 @@ package org.example.backendrl.service;
 
 import org.example.backendrl.dto.ArtistSummaryResponse;
 import org.example.backendrl.dto.GenreResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.entity.Artist;
 import org.example.backendrl.entity.ArtistGenre;
 import org.example.backendrl.entity.Genre;
@@ -10,10 +11,11 @@ import org.example.backendrl.exception.ResourceNotFoundException;
 import org.example.backendrl.repository.ArtistGenreRepository;
 import org.example.backendrl.repository.ArtistRepository;
 import org.example.backendrl.repository.GenreRepository;
+import org.example.backendrl.repository.spec.Specs;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class ArtistGenreService {
@@ -32,18 +34,27 @@ public class ArtistGenreService {
         this.genreRepository = genreRepository;
     }
 
-    public List<GenreResponse> getGenresForArtist(Long artistId) {
+    public PageResponse<GenreResponse> getGenresForArtist(
+            Long artistId,
+            String name,
+            Pageable pageable
+    ) {
+
         if (!artistRepository.existsById(artistId)) {
             throw new ResourceNotFoundException(
                     "Artist with id " + artistId + " not found"
             );
         }
 
-        return artistGenreRepository.findByArtistId(artistId)
-                .stream()
-                .map(ArtistGenre::getGenre)
-                .map(GenreResponse::fromEntity)
-                .toList();
+        Specification<ArtistGenre> filter = Specs.all(
+                Specs.equal("artist.id", artistId),
+                Specs.contains("genre.name", name)
+        );
+
+        return PageResponse.from(
+                artistGenreRepository.findAll(filter, pageable),
+                artistGenre -> GenreResponse.fromEntity(artistGenre.getGenre())
+        );
     }
 
     public void addGenreToArtist(Long artistId, Long genreId) {
@@ -101,7 +112,11 @@ public class ArtistGenreService {
         );
     }
 
-    public List<ArtistSummaryResponse> getArtistsForGenre(Long genreId) {
+    public PageResponse<ArtistSummaryResponse> getArtistsForGenre(
+            Long genreId,
+            String name,
+            Pageable pageable
+    ) {
 
         if (!genreRepository.existsById(genreId)) {
             throw new ResourceNotFoundException(
@@ -109,10 +124,14 @@ public class ArtistGenreService {
             );
         }
 
-        return artistGenreRepository.findByGenreId(genreId)
-                .stream()
-                .map(ArtistGenre::getArtist)
-                .map(ArtistSummaryResponse::fromEntity)
-                .toList();
+        Specification<ArtistGenre> filter = Specs.all(
+                Specs.equal("genre.id", genreId),
+                Specs.contains("artist.name", name)
+        );
+
+        return PageResponse.from(
+                artistGenreRepository.findAll(filter, pageable),
+                artistGenre -> ArtistSummaryResponse.fromEntity(artistGenre.getArtist())
+        );
     }
 }

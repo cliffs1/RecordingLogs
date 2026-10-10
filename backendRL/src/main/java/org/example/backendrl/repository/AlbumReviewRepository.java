@@ -2,10 +2,11 @@ package org.example.backendrl.repository;
 
 import org.example.backendrl.entity.AlbumReview;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 
-public interface AlbumReviewRepository extends JpaRepository<AlbumReview, Long> {
+public interface AlbumReviewRepository extends JpaRepository<AlbumReview, Long>, JpaSpecificationExecutor<AlbumReview> {
 
     List<AlbumReview> findAllByOrderByCreatedAtDesc();
 

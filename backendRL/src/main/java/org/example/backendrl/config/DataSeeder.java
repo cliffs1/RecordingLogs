@@ -24,7 +24,6 @@ public class DataSeeder implements CommandLineRunner {
     private final AlbumRepository albumRepository;
     private final SongRepository songRepository;
     private final ArtistGenreRepository artistGenreRepository;
-    private final ArtistSongRepository artistSongRepository;
     private final UserRepository userRepository;
     private final AlbumRatingRepository albumRatingRepository;
     private final SongRatingRepository songRatingRepository;
@@ -32,6 +31,11 @@ public class DataSeeder implements CommandLineRunner {
     private final AlbumListRepository albumListRepository;
     private final AlbumFavoriteRepository albumFavoriteRepository;
     private final UserFollowRepository userFollowRepository;
+
+    /**
+     * Cover Art Archive image of a MusicBrainz release group (append "<mbid>/front-500").
+     */
+    private static final String COVER_ART_URL = "https://coverartarchive.org/release-group/";
 
     private final Map<String, Genre> genres = new HashMap<>();
     private final Map<String, Album> albums = new HashMap<>();
@@ -44,7 +48,6 @@ public class DataSeeder implements CommandLineRunner {
             AlbumRepository albumRepository,
             SongRepository songRepository,
             ArtistGenreRepository artistGenreRepository,
-            ArtistSongRepository artistSongRepository,
             UserRepository userRepository,
             AlbumRatingRepository albumRatingRepository,
             SongRatingRepository songRatingRepository,
@@ -58,7 +61,6 @@ public class DataSeeder implements CommandLineRunner {
         this.albumRepository = albumRepository;
         this.songRepository = songRepository;
         this.artistGenreRepository = artistGenreRepository;
-        this.artistSongRepository = artistSongRepository;
         this.userRepository = userRepository;
         this.albumRatingRepository = albumRatingRepository;
         this.songRatingRepository = songRatingRepository;
@@ -100,10 +102,12 @@ public class DataSeeder implements CommandLineRunner {
                 "English rock band formed in Abingdon in 1985.",
                 "Alternative", "Rock");
         album(radiohead, "OK Computer", LocalDate.of(1997, 5, 21),
+                "b1392450-e666-3926-a536-22c65f834433",
                 new String[]{"Alternative", "Rock"},
                 "Airbag", 284, "Paranoid Android", 383,
                 "Karma Police", 261, "No Surprises", 229);
         album(radiohead, "In Rainbows", LocalDate.of(2007, 10, 10),
+                "6e335887-60ba-38f0-95af-fae7774336bf",
                 new String[]{"Alternative"},
                 "15 Step", 237, "Nude", 255, "Reckoner", 290);
 
@@ -111,6 +115,7 @@ public class DataSeeder implements CommandLineRunner {
                 "English progressive rock band formed in London in 1965.",
                 "Rock");
         album(pinkFloyd, "The Dark Side of the Moon", LocalDate.of(1973, 3, 1),
+                "f5093c06-23e3-404f-aeaa-40f72885ee3a",
                 new String[]{"Rock"},
                 "Time", 413, "Money", 382, "Us and Them", 469);
 
@@ -118,9 +123,11 @@ public class DataSeeder implements CommandLineRunner {
                 "American rapper and songwriter from Compton, California.",
                 "Hip-Hop");
         album(kendrick, "To Pimp a Butterfly", LocalDate.of(2015, 3, 15),
+                "d9103c72-3807-4378-9ce7-b6f3e8fdd547",
                 new String[]{"Hip-Hop", "Jazz"},
                 "King Kunta", 234, "Alright", 219, "The Blacker the Berry", 328);
         album(kendrick, "good kid, m.A.A.d city", LocalDate.of(2012, 10, 22),
+                "499c19c8-0dab-4824-884b-6191d145e95b",
                 new String[]{"Hip-Hop"},
                 "Money Trees", 386, "Swimming Pools", 313);
 
@@ -128,9 +135,11 @@ public class DataSeeder implements CommandLineRunner {
                 "French electronic music duo formed in Paris in 1993.",
                 "Electronic");
         album(daftPunk, "Random Access Memories", LocalDate.of(2013, 5, 17),
+                "aa997ea0-2936-40bd-884d-3af8a0e064dc",
                 new String[]{"Electronic", "Pop"},
                 "Get Lucky", 369, "Instant Crush", 337, "Giorgio by Moroder", 544);
         album(daftPunk, "Discovery", LocalDate.of(2001, 3, 12),
+                "48117b90-a16e-34ca-a514-19c702df1158",
                 new String[]{"Electronic"},
                 "One More Time", 320, "Digital Love", 301);
 
@@ -138,6 +147,7 @@ public class DataSeeder implements CommandLineRunner {
                 "American jazz trumpeter, bandleader and composer.",
                 "Jazz");
         album(milesDavis, "Kind of Blue", LocalDate.of(1959, 8, 17),
+                "8e8a594f-2175-38c7-a871-abb68ec363e7",
                 new String[]{"Jazz"},
                 "So What", 562, "Freddie Freeloader", 586, "Blue in Green", 337);
 
@@ -145,9 +155,11 @@ public class DataSeeder implements CommandLineRunner {
                 "American singer, songwriter and record producer.",
                 "R&B");
         album(frankOcean, "Blonde", LocalDate.of(2016, 8, 20),
+                "0da340a0-6ad7-4fc2-a272-6f94393a7831",
                 new String[]{"R&B", "Alternative"},
                 "Nikes", 314, "Ivy", 249, "Pink + White", 184);
         album(frankOcean, "channel ORANGE", LocalDate.of(2012, 7, 10),
+                "f8f4167d-897c-4b25-a171-638374d1dfa4",
                 new String[]{"R&B"},
                 "Thinkin Bout You", 200, "Pyramids", 592);
 
@@ -155,6 +167,7 @@ public class DataSeeder implements CommandLineRunner {
                 "American heavy metal band formed in Los Angeles in 1981.",
                 "Metal");
         album(metallica, "Master of Puppets", LocalDate.of(1986, 3, 3),
+                "3d00fb45-f8ab-3436-a8e1-b4bfc4d66913",
                 new String[]{"Metal"},
                 "Battery", 312, "Master of Puppets", 515);
 
@@ -162,6 +175,7 @@ public class DataSeeder implements CommandLineRunner {
                 "English rock band formed in Liverpool in 1960.",
                 "Rock", "Pop");
         album(beatles, "Abbey Road", LocalDate.of(1969, 9, 26),
+                "9162580e-5df4-32de-80cc-f45a8d8a9b1d",
                 new String[]{"Rock", "Pop"},
                 "Come Together", 259, "Something", 182, "Here Comes the Sun", 185);
 
@@ -169,6 +183,7 @@ public class DataSeeder implements CommandLineRunner {
                 "English rock band formed in Sheffield in 2002.",
                 "Alternative", "Rock");
         album(arcticMonkeys, "AM", LocalDate.of(2013, 9, 9),
+                "a348ba2f-f8b3-4686-b928-e63d8d94d543",
                 new String[]{"Alternative", "Rock"},
                 "Do I Wanna Know?", 272, "R U Mine?", 201, "Arabella", 207);
 
@@ -176,6 +191,7 @@ public class DataSeeder implements CommandLineRunner {
                 "American singer-songwriter from Los Angeles.",
                 "Pop");
         album(billie, "When We All Fall Asleep, Where Do We Go?", LocalDate.of(2019, 3, 29),
+                "72375978-a9a1-4254-b957-85565c716b7e",
                 new String[]{"Pop", "Electronic"},
                 "bad guy", 194, "bury a friend", 193);
     }
@@ -208,6 +224,12 @@ public class DataSeeder implements CommandLineRunner {
         albumRating("lukas", "Master of Puppets", 10);
         albumRating("lukas", "The Dark Side of the Moon", 8);
         albumRating("lukas", "AM", 6);
+        albumRating("ieva", "OK Computer", 9);
+        albumRating("jonas", "OK Computer", 9);
+        albumRating("lukas", "Blonde", 9);
+        albumRating("rokas", "To Pimp a Butterfly", 9);
+        albumRating("egle", "Abbey Road", 9);
+        albumRating("jonas", "Kind of Blue", 10);
 
         songRating("rokas", "Paranoid Android", 10);
         songRating("rokas", "Reckoner", 9);
@@ -216,6 +238,11 @@ public class DataSeeder implements CommandLineRunner {
         songRating("jonas", "Alright", 10);
         songRating("ieva", "Here Comes the Sun", 10);
         songRating("lukas", "Battery", 9);
+        songRating("egle", "Paranoid Android", 9);
+        songRating("ieva", "Paranoid Android", 10);
+        songRating("rokas", "Alright", 9);
+        songRating("lukas", "Ivy", 8);
+        songRating("jonas", "Get Lucky", 7);
 
         review("rokas", "OK Computer", "A timeless masterpiece",
                 "Every track flows into the next. Paranoid Android is still "
@@ -280,13 +307,15 @@ public class DataSeeder implements CommandLineRunner {
             Artist artist,
             String title,
             LocalDate releaseDate,
+            String musicBrainzId,
             String[] genreNames,
             Object... tracks) {
 
         Album album = new Album();
         album.setTitle(title);
         album.setReleaseDate(releaseDate);
-        album.getArtists().add(artist);
+        album.setCoverUrl(COVER_ART_URL + musicBrainzId + "/front-500");
+        album.setArtist(artist);
 
         for (String genreName : genreNames) {
             AlbumGenre albumGenre = new AlbumGenre();
@@ -300,6 +329,9 @@ public class DataSeeder implements CommandLineRunner {
             song.setTitle((String) tracks[i]);
             song.setDurationSeconds((Integer) tracks[i + 1]);
             song.setOriginalReleaseDate(releaseDate);
+            song.setAlbum(album);
+            song.setTrackNumber(i / 2 + 1);
+            song.setDiscNumber(1);
 
             for (String genreName : genreNames) {
                 SongGenre songGenre = new SongGenre();
@@ -308,23 +340,15 @@ public class DataSeeder implements CommandLineRunner {
                 song.getGenres().add(songGenre);
             }
 
-            song = songRepository.save(song);
-            songs.put(song.getTitle(), song);
-
-            SongArtist songArtist = new SongArtist();
-            songArtist.setSong(song);
-            songArtist.setArtist(artist);
-            artistSongRepository.save(songArtist);
-
-            AlbumSong albumSong = new AlbumSong();
-            albumSong.setAlbum(album);
-            albumSong.setSong(song);
-            albumSong.setTrackNumber(i / 2 + 1);
-            albumSong.setDiscNumber(1);
-            album.getSongs().add(albumSong);
+            album.getSongs().add(song);
         }
 
-        albums.put(title, albumRepository.save(album));
+        album = albumRepository.save(album);
+        albums.put(title, album);
+
+        for (Song song : album.getSongs()) {
+            songs.put(song.getTitle(), song);
+        }
     }
 
     private void user(String username, String email, String displayName) {

@@ -1,5 +1,7 @@
 package org.example.backendrl.exception;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -58,6 +60,22 @@ public class GlobalExceptionHandler {
         return Map.of(
                 "error", "Invalid value for parameter '"
                         + exception.getName() + "'"
+        );
+    }
+
+    /**
+     * Unknown field in ?sort=... (e.g. sort=bogus,asc).
+     */
+    @ExceptionHandler({
+            PropertyReferenceException.class,
+            InvalidDataAccessApiUsageException.class
+    })
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleInvalidSort(
+            RuntimeException exception) {
+
+        return Map.of(
+                "error", "Invalid sort parameter"
         );
     }
 

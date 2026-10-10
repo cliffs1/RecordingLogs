@@ -1,5 +1,6 @@
 package org.example.backendrl.service;
 
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.dto.UserRequest;
 import org.example.backendrl.dto.UserResponse;
 import org.example.backendrl.entity.User;
@@ -12,10 +13,11 @@ import org.example.backendrl.repository.AlbumReviewRepository;
 import org.example.backendrl.repository.SongRatingRepository;
 import org.example.backendrl.repository.UserFollowRepository;
 import org.example.backendrl.repository.UserRepository;
+import org.example.backendrl.repository.spec.Specs;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class UserService {
@@ -46,11 +48,20 @@ public class UserService {
         this.userFollowRepository = userFollowRepository;
     }
 
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(UserResponse::fromEntity)
-                .toList();
+    public PageResponse<UserResponse> getAllUsers(
+            String username,
+            String displayName,
+            Pageable pageable
+    ) {
+        Specification<User> filter = Specs.all(
+                Specs.contains("username", username),
+                Specs.contains("displayName", displayName)
+        );
+
+        return PageResponse.from(
+                userRepository.findAll(filter, pageable),
+                UserResponse::fromEntity
+        );
     }
 
     public UserResponse getUserById(Long id) {

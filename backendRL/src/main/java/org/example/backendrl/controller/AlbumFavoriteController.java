@@ -1,14 +1,23 @@
 package org.example.backendrl.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.backendrl.dto.AlbumFavoriteResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.service.AlbumFavoriteService;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -28,8 +37,17 @@ public class AlbumFavoriteController {
             @ApiResponse(responseCode = "200", description = "List of favorite albums"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public List<AlbumFavoriteResponse> getFavorites(@PathVariable Long userId) {
-        return albumFavoriteService.getFavoritesForUser(userId);
+    public PageResponse<AlbumFavoriteResponse> getFavorites(
+            @PathVariable Long userId,
+            @Parameter(description = "Part of the album title")
+            @RequestParam(required = false) String albumTitle,
+            @Parameter(description = "Favorited on or after this date (yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "Favorited on or before this date (yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @ParameterObject @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return albumFavoriteService.getFavoritesForUser(userId, albumTitle, from, to, pageable);
     }
 
     @PostMapping("/{userId}/favorites/{albumId}")

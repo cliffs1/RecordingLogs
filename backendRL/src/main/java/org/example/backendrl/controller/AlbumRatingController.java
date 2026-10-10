@@ -1,16 +1,25 @@
 package org.example.backendrl.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.example.backendrl.dto.AlbumRatingRequest;
 import org.example.backendrl.dto.AlbumRatingResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.service.AlbumRatingService;
-import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -30,10 +39,19 @@ public class AlbumRatingController {
             @ApiResponse(responseCode = "200", description = "List of ratings"),
             @ApiResponse(responseCode = "404", description = "Album not found")
     })
-    public List<AlbumRatingResponse> getRatingsForAlbum(
-            @PathVariable Long albumId) {
-
-        return albumRatingService.getRatingsForAlbum(albumId);
+    public PageResponse<AlbumRatingResponse> getRatingsForAlbum(
+            @PathVariable Long albumId,
+            @Parameter(description = "Minimum rating (1-10)")
+            @RequestParam(required = false) Integer minRating,
+            @Parameter(description = "Maximum rating (1-10)")
+            @RequestParam(required = false) Integer maxRating,
+            @Parameter(description = "Rated on or after this date (yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "Rated on or before this date (yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @ParameterObject @PageableDefault(size = 20, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return albumRatingService.getRatingsForAlbum(albumId, minRating, maxRating, from, to, pageable);
     }
 
     @GetMapping("/{albumId}/ratings/{userId}")

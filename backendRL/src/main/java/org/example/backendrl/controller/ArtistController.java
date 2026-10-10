@@ -1,17 +1,20 @@
 package org.example.backendrl.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.backendrl.dto.ArtistRequest;
 import org.example.backendrl.dto.ArtistResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.service.ArtistService;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/artists")
@@ -25,10 +28,19 @@ public class ArtistController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all artists")
-    @ApiResponse(responseCode = "200", description = "List of artists")
-    public List<ArtistResponse> getAllArtists() {
-        return artistService.getAllArtists();
+    @Operation(summary = "Get artists (paged, filterable)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Page of artists"),
+            @ApiResponse(responseCode = "400", description = "Invalid paging or sort parameter")
+    })
+    public PageResponse<ArtistResponse> getArtists(
+            @Parameter(description = "Part of the artist name (case-insensitive)")
+            @RequestParam(required = false) String name,
+            @Parameter(description = "Genre name, e.g. Rock")
+            @RequestParam(required = false) String genre,
+            @ParameterObject @PageableDefault(size = 20, sort = "name") Pageable pageable
+    ) {
+        return artistService.getArtists(name, genre, pageable);
     }
 
     @GetMapping("/{id}")

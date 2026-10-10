@@ -1,15 +1,21 @@
 package org.example.backendrl.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.dto.UserRequest;
 import org.example.backendrl.dto.UserResponse;
 import org.example.backendrl.service.UserService;
-import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -27,8 +33,14 @@ public class UserController {
     @GetMapping
     @Operation(summary = "Get all users")
     @ApiResponse(responseCode = "200", description = "List of users")
-    public List<UserResponse> getAllUsers() {
-        return userService.getAllUsers();
+    public PageResponse<UserResponse> getAllUsers(
+            @Parameter(description = "Part of the username")
+            @RequestParam(required = false) String username,
+            @Parameter(description = "Part of the display name")
+            @RequestParam(required = false) String displayName,
+            @ParameterObject @PageableDefault(size = 20, sort = "username") Pageable pageable
+    ) {
+        return userService.getAllUsers(username, displayName, pageable);
     }
 
     @GetMapping("/{id}")

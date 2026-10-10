@@ -2,11 +2,12 @@ package org.example.backendrl.repository;
 
 import org.example.backendrl.entity.UserFollow;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface UserFollowRepository extends JpaRepository<UserFollow, Long> {
+public interface UserFollowRepository extends JpaRepository<UserFollow, Long>, JpaSpecificationExecutor<UserFollow> {
 
     List<UserFollow> findByFollowerId(Long followerId);
 

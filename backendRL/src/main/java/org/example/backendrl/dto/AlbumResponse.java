@@ -2,9 +2,10 @@ package org.example.backendrl.dto;
 
 import java.time.LocalDate;
 
-public class AlbumResponse {
+public class AlbumResponse extends HypermediaResponse {
 
     private Long id;
+    private Long artistId;
     private String title;
     private LocalDate releaseDate;
     private String coverUrl;
@@ -14,11 +15,13 @@ public class AlbumResponse {
 
     public AlbumResponse(
             Long id,
+            Long artistId,
             String title,
             LocalDate releaseDate,
             String coverUrl
     ) {
         this.id = id;
+        this.artistId = artistId;
         this.title = title;
         this.releaseDate = releaseDate;
         this.coverUrl = coverUrl;
@@ -26,6 +29,10 @@ public class AlbumResponse {
 
     public Long getId() {
         return id;
+    }
+
+    public Long getArtistId() {
+        return artistId;
     }
 
     public String getTitle() {

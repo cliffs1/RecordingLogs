@@ -1,5 +1,8 @@
 package org.example.backendrl.service;
 
+import org.example.backendrl.dto.GenreResponse;
+import org.example.backendrl.dto.PageResponse;
+import org.example.backendrl.dto.SongSummaryResponse;
 import org.example.backendrl.entity.Genre;
 import org.example.backendrl.entity.Song;
 import org.example.backendrl.entity.SongGenre;
@@ -8,11 +11,11 @@ import org.example.backendrl.exception.ResourceNotFoundException;
 import org.example.backendrl.repository.GenreRepository;
 import org.example.backendrl.repository.SongGenreRepository;
 import org.example.backendrl.repository.SongRepository;
+import org.example.backendrl.repository.spec.Specs;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.example.backendrl.dto.SongSummaryResponse;
-
-import java.util.List;
 
 @Service
 public class SongGenreService {
@@ -31,7 +34,11 @@ public class SongGenreService {
         this.genreRepository = genreRepository;
     }
 
-    public List<Genre> getGenresForSong(Long songId) {
+    public PageResponse<GenreResponse> getGenresForSong(
+            Long songId,
+            String name,
+            Pageable pageable
+    ) {
 
         if (!songRepository.existsById(songId)) {
             throw new ResourceNotFoundException(
@@ -39,13 +46,24 @@ public class SongGenreService {
             );
         }
 
-        return songGenreRepository.findBySongId(songId)
-                .stream()
-                .map(SongGenre::getGenre)
-                .toList();
+        Specification<SongGenre> filter = Specs.all(
+                Specs.equal("song.id", songId),
+                Specs.contains("genre.name", name)
+        );
+
+        return PageResponse.from(
+                songGenreRepository.findAll(filter, pageable),
+                songGenre -> GenreResponse.fromEntity(songGenre.getGenre())
+        );
     }
 
-    public List<SongSummaryResponse> getSongsForGenre(Long genreId) {
+    public PageResponse<SongSummaryResponse> getSongsForGenre(
+            Long genreId,
+            String title,
+            Integer minDuration,
+            Integer maxDuration,
+            Pageable pageable
+    ) {
 
         if (!genreRepository.existsById(genreId)) {
             throw new ResourceNotFoundException(
@@ -53,11 +71,17 @@ public class SongGenreService {
             );
         }
 
-        return songGenreRepository.findByGenreId(genreId)
-                .stream()
-                .map(SongGenre::getSong)
-                .map(SongSummaryResponse::fromEntity)
-                .toList();
+        Specification<SongGenre> filter = Specs.all(
+                Specs.equal("genre.id", genreId),
+                Specs.contains("song.title", title),
+                Specs.atLeast("song.durationSeconds", minDuration),
+                Specs.atMost("song.durationSeconds", maxDuration)
+        );
+
+        return PageResponse.from(
+                songGenreRepository.findAll(filter, pageable),
+                songGenre -> SongSummaryResponse.fromEntity(songGenre.getSong())
+        );
     }
 
     public void addGenreToSong(Long songId, Long genreId) {

@@ -2,6 +2,9 @@ package org.example.backendrl.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "artists")
 public class Artist {
@@ -14,6 +17,13 @@ public class Artist {
     private String name;
 
     private String biography;
+
+    @OneToMany(
+            mappedBy = "artist",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Album> albums = new ArrayList<>();
 
     public Artist() {
     }
@@ -36,5 +46,9 @@ public class Artist {
 
     public void setBiography(String biography) {
         this.biography = biography;
+    }
+
+    public List<Album> getAlbums() {
+        return albums;
     }
 }

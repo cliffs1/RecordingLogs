@@ -3,7 +3,9 @@ package org.example.backendrl.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -21,13 +23,9 @@ public class Album {
 
     private String coverUrl;
 
-    @ManyToMany
-    @JoinTable(
-            name = "album_artists",
-            joinColumns = @JoinColumn(name = "album_id"),
-            inverseJoinColumns = @JoinColumn(name = "artist_id")
-    )
-    private Set<Artist> artists = new HashSet<>();
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "artist_id")
+    private Artist artist;
 
     @OneToMany(
             mappedBy = "album",
@@ -41,7 +39,8 @@ public class Album {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private Set<AlbumSong> songs = new HashSet<>();
+    @OrderBy("discNumber ASC, trackNumber ASC")
+    private List<Song> songs = new ArrayList<>();
 
     public Album() {
     }
@@ -74,15 +73,19 @@ public class Album {
         this.coverUrl = coverUrl;
     }
 
-    public Set<Artist> getArtists() {
-        return artists;
+    public Artist getArtist() {
+        return artist;
+    }
+
+    public void setArtist(Artist artist) {
+        this.artist = artist;
     }
 
     public Set<AlbumGenre> getGenres() {
         return genres;
     }
 
-    public Set<AlbumSong> getSongs() {
+    public List<Song> getSongs() {
         return songs;
     }
 }

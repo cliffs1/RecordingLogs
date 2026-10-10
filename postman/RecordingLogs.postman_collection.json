@@ -95,6 +95,85 @@
               "raw": "{\n  \"username\": \"demo_b_{{runId}}\",\n  \"email\": \"demo_b_{{runId}}@example.com\",\n  \"password\": \"secret123\",\n  \"displayName\": \"Demo User B\"\n}"
             }
           }
+        },
+        {
+          "name": "Filter users by username",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Exactly 1 user matches\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });",
+                  "pm.test(\"It is user A\", () => { const b = pm.response.json(); pm.expect(b.content.some(x => x.id == pm.collectionVariables.get(\"userA\"))).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?username=demo_a_{{runId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "demo_a_{{runId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Users - page size 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Page has 1 user and a next link\", () => { const b = pm.response.json(); pm.expect(b.content.length === 1).to.be.true; pm.expect(b._links.next.href).to.include(\"page=1\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?size=1&page=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "1"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                }
+              ]
+            }
+          }
         }
       ]
     },
@@ -150,7 +229,7 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });"
                 ]
               }
             }
@@ -166,6 +245,44 @@
               "path": [
                 "api",
                 "genres"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter genres by name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Exactly 1 genre matches\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });",
+                  "pm.test(\"It is the created genre\", () => { const b = pm.response.json(); pm.expect(b.content.some(x => x.id == pm.collectionVariables.get(\"genreId\"))).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/genres?name={{runId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "genres"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "{{runId}}"
+                }
               ]
             }
           }
@@ -281,6 +398,174 @@
           }
         },
         {
+          "name": "Create second artist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.collectionVariables.set(\"otherArtistId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Slowdive\",\n  \"biography\": \"English rock band formed in Reading in 1989.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get artists filtered by name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Contains created artist\", () => { const b = pm.response.json(); pm.expect(b.content.some(a => a.id == pm.collectionVariables.get(\"artistId\"))).to.be.true; });",
+                  "pm.test(\"Every result matches the filter\", () => { const b = pm.response.json(); pm.expect(b.content.every(a => a.name.toLowerCase().includes(\"valentine\"))).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists?name=valentine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "valentine"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get artists page 1 of size 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Page has 1 item\", () => { const b = pm.response.json(); pm.expect(b.content.length === 1 && b.size === 1).to.be.true; });",
+                  "pm.test(\"Has next link but no prev link\", () => { const l = pm.response.json()._links; pm.expect(l.next.href).to.include(\"page=1\"); pm.expect(l.next.href).to.include(\"size=1\"); pm.expect(l.prev).to.be.undefined; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists?page=0&size=1&sort=name,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "1"
+                },
+                {
+                  "key": "sort",
+                  "value": "name,asc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get artists page 2 of size 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Has prev link\", () => { const l = pm.response.json()._links; pm.expect(l.prev.href).to.include(\"page=0\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists?page=1&size=1&sort=name,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "1"
+                },
+                {
+                  "key": "sort",
+                  "value": "name,asc"
+                }
+              ]
+            }
+          }
+        },
+        {
           "name": "Get artist",
           "event": [
             {
@@ -290,7 +575,8 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Name matches\", () => { const b = pm.response.json(); pm.expect(b.name === \"My Bloody Valentine\").to.be.true; });"
+                  "pm.test(\"Name matches\", () => { const b = pm.response.json(); pm.expect(b.name === \"My Bloody Valentine\").to.be.true; });",
+                  "pm.test(\"Has hypermedia links\", () => { const l = pm.response.json()._links; pm.expect(l.self.href).to.include(\"/api/artists/\" + pm.collectionVariables.get(\"artistId\")); pm.expect(l.albums.href).to.include(\"/albums\"); });"
                 ]
               }
             }
@@ -312,6 +598,46 @@
           }
         },
         {
+          "name": "Update artist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Biography updated\", () => { const b = pm.response.json(); pm.expect(b.biography === \"Shoegaze pioneers from Dublin.\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Bloody Valentine\",\n  \"biography\": \"Shoegaze pioneers from Dublin.\"\n}"
+            }
+          }
+        },
+        {
           "name": "Create album",
           "event": [
             {
@@ -321,7 +647,8 @@
                 "exec": [
                   "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.collectionVariables.set(\"albumId\", pm.response.json().id);"
+                  "pm.collectionVariables.set(\"albumId\", pm.response.json().id);",
+                  "pm.test(\"Album belongs to artist\", () => { const b = pm.response.json(); pm.expect(b.artistId == pm.collectionVariables.get(\"artistId\")).to.be.true; });"
                 ]
               }
             }
@@ -335,12 +662,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/albums",
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "artists",
+                "{{artistId}}",
                 "albums"
               ]
             },
@@ -351,7 +680,7 @@
           }
         },
         {
-          "name": "Get all albums",
+          "name": "Get artist albums",
           "event": [
             {
               "listen": "test",
@@ -360,7 +689,8 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Contains created album\", () => { const b = pm.response.json(); pm.expect(b.content.some(a => a.id == pm.collectionVariables.get(\"albumId\"))).to.be.true; });"
                 ]
               }
             }
@@ -369,13 +699,131 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/albums",
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "artists",
+                "{{artistId}}",
                 "albums"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter albums by release date",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Album released in 1991 is found\", () => { const b = pm.response.json(); pm.expect(b.content.some(a => a.id == pm.collectionVariables.get(\"albumId\"))).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums?releasedFrom=1991-01-01&releasedTo=1991-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums"
+              ],
+              "query": [
+                {
+                  "key": "releasedFrom",
+                  "value": "1991-01-01"
+                },
+                {
+                  "key": "releasedTo",
+                  "value": "1991-12-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter albums - no match",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"No albums match\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums?title=nonexistent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums"
+              ],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "nonexistent"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get album",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Title matches\", () => { const b = pm.response.json(); pm.expect(b.title === \"Loveless\").to.be.true; });",
+                  "pm.test(\"Has hypermedia links\", () => { const l = pm.response.json()._links; pm.expect(l.self.href).to.include(\"/albums/\" + pm.collectionVariables.get(\"albumId\")); pm.expect(l.artist.href).to.include(\"/api/artists/\" + pm.collectionVariables.get(\"artistId\")); pm.expect(l.songs.href).to.include(\"/songs\"); pm.expect(l.cover.href).to.eql(\"https://example.com/loveless.jpg\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums",
+                "{{albumId}}"
               ]
             }
           }
@@ -404,12 +852,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/albums/{{albumId}}",
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "artists",
+                "{{artistId}}",
                 "albums",
                 "{{albumId}}"
               ]
@@ -430,7 +880,8 @@
                 "exec": [
                   "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.collectionVariables.set(\"songId\", pm.response.json().id);"
+                  "pm.collectionVariables.set(\"songId\", pm.response.json().id);",
+                  "pm.test(\"Song belongs to album\", () => { const b = pm.response.json(); pm.expect(b.albumId == pm.collectionVariables.get(\"albumId\")).to.be.true; });"
                 ]
               }
             }
@@ -444,91 +895,22 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/songs",
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}/songs",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "artists",
+                "{{artistId}}",
+                "albums",
+                "{{albumId}}",
                 "songs"
               ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Only Shallow\",\n  \"durationSeconds\": 257,\n  \"originalReleaseDate\": \"1991-11-04\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Add song to album",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
-                  "pm.test(\"Body is empty\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/albums/{{albumId}}/songs/{{songId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "albums",
-                "{{albumId}}",
-                "songs",
-                "{{songId}}"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"trackNumber\": 1,\n  \"discNumber\": 1\n}"
-            }
-          }
-        },
-        {
-          "name": "Add artist to album",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
-                  "pm.test(\"Body is empty\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/albums/{{albumId}}/artists/{{artistId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "albums",
-                "{{albumId}}",
-                "artists",
-                "{{artistId}}"
-              ]
+              "raw": "{\n  \"title\": \"Only Shallow\",\n  \"durationSeconds\": 257,\n  \"originalReleaseDate\": \"1991-11-04\",\n  \"trackNumber\": 1,\n  \"discNumber\": 1\n}"
             }
           }
         },
@@ -542,8 +924,8 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });",
-                  "pm.test(\"Album has 1 song\", () => { const b = pm.response.json(); pm.expect(b.length === 1).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Album has 1 song\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
                 ]
               }
             }
@@ -552,7 +934,210 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/albums/{{albumId}}/songs",
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}/songs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums",
+                "{{albumId}}",
+                "songs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get song",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Track number is 1\", () => { const b = pm.response.json(); pm.expect(b.trackNumber === 1).to.be.true; });",
+                  "pm.test(\"Has hypermedia links\", () => { const l = pm.response.json()._links; pm.expect(l.self.href).to.include(\"/songs/\" + pm.collectionVariables.get(\"songId\")); pm.expect(l.album.href).to.include(\"/albums/\" + pm.collectionVariables.get(\"albumId\")); pm.expect(l.ratings.href).to.include(\"/ratings\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}/songs/{{songId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums",
+                "{{albumId}}",
+                "songs",
+                "{{songId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update song",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Title updated\", () => { const b = pm.response.json(); pm.expect(b.title === \"Only Shallow (Remastered)\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}/songs/{{songId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums",
+                "{{albumId}}",
+                "songs",
+                "{{songId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Only Shallow (Remastered)\",\n  \"durationSeconds\": 258,\n  \"originalReleaseDate\": \"1991-11-04\",\n  \"trackNumber\": 1,\n  \"discNumber\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Filter songs by duration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Song matches the filter\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1 && b.content[0].id == pm.collectionVariables.get(\"songId\")).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}/songs?minDuration=200&maxDuration=300&title=shallow",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums",
+                "{{albumId}}",
+                "songs"
+              ],
+              "query": [
+                {
+                  "key": "minDuration",
+                  "value": "200"
+                },
+                {
+                  "key": "maxDuration",
+                  "value": "300"
+                },
+                {
+                  "key": "title",
+                  "value": "shallow"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter songs - too short",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"No songs match\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}/songs?minDuration=600",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums",
+                "{{albumId}}",
+                "songs"
+              ],
+              "query": [
+                {
+                  "key": "minDuration",
+                  "value": "600"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add genre to album",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Body is empty\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albums/{{albumId}}/genres/{{genreId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -560,7 +1145,353 @@
                 "api",
                 "albums",
                 "{{albumId}}",
+                "genres",
+                "{{genreId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add genre to artist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Body is empty\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/genres/{{genreId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "genres",
+                "{{genreId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add genre to song",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Body is empty\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/songs/{{songId}}/genres/{{genreId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "songs",
+                "{{songId}}",
+                "genres",
+                "{{genreId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get album genres filtered by name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Album has the genre\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });",
+                  "pm.test(\"It is the created genre\", () => { const b = pm.response.json(); pm.expect(b.content.some(x => x.id == pm.collectionVariables.get(\"genreId\"))).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albums/{{albumId}}/genres?name={{runId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albums",
+                "{{albumId}}",
+                "genres"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "{{runId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get artist genres filtered by name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Artist has the genre\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/genres?name={{runId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "genres"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "{{runId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get song genres filtered by name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Song has the genre\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/songs/{{songId}}/genres?name={{runId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "songs",
+                "{{songId}}",
+                "genres"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "{{runId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get genre albums filtered by title",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Album matches\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });",
+                  "pm.test(\"It is the created album\", () => { const b = pm.response.json(); pm.expect(b.content.some(x => x.id == pm.collectionVariables.get(\"albumId\"))).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/genres/{{genreId}}/albums?title=loveless&releasedFrom=1991-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "genres",
+                "{{genreId}}",
+                "albums"
+              ],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "loveless"
+                },
+                {
+                  "key": "releasedFrom",
+                  "value": "1991-01-01"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get genre artists filtered by name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Artist matches\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });",
+                  "pm.test(\"It is the created artist\", () => { const b = pm.response.json(); pm.expect(b.content.some(x => x.id == pm.collectionVariables.get(\"artistId\"))).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/genres/{{genreId}}/artists?name=valentine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "genres",
+                "{{genreId}}",
+                "artists"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "valentine"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get genre songs filtered by duration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Song matches\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });",
+                  "pm.test(\"It is the created song\", () => { const b = pm.response.json(); pm.expect(b.content.some(x => x.id == pm.collectionVariables.get(\"songId\"))).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/genres/{{genreId}}/songs?maxDuration=300",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "genres",
+                "{{genreId}}",
                 "songs"
+              ],
+              "query": [
+                {
+                  "key": "maxDuration",
+                  "value": "300"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get genre songs - no match",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"No songs match\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/genres/{{genreId}}/songs?minDuration=600",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "genres",
+                "{{genreId}}",
+                "songs"
+              ],
+              "query": [
+                {
+                  "key": "minDuration",
+                  "value": "600"
+                }
               ]
             }
           }
@@ -663,8 +1594,8 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });",
-                  "pm.test(\"Has 1 rating\", () => { const b = pm.response.json(); pm.expect(b.length === 1).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Has 1 rating\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
                 ]
               }
             }
@@ -682,6 +1613,88 @@
                 "albums",
                 "{{albumId}}",
                 "ratings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter album ratings - minRating 9",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Rating 8 is excluded\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albums/{{albumId}}/ratings?minRating=9",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albums",
+                "{{albumId}}",
+                "ratings"
+              ],
+              "query": [
+                {
+                  "key": "minRating",
+                  "value": "9"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter album ratings - maxRating 8",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Rating 8 is included\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albums/{{albumId}}/ratings?maxRating=8&from=2000-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albums",
+                "{{albumId}}",
+                "ratings"
+              ],
+              "query": [
+                {
+                  "key": "maxRating",
+                  "value": "8"
+                },
+                {
+                  "key": "from",
+                  "value": "2000-01-01"
+                }
               ]
             }
           }
@@ -727,6 +1740,82 @@
           }
         },
         {
+          "name": "Get song ratings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Song has 1 rating\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/songs/{{songId}}/ratings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "songs",
+                "{{songId}}",
+                "ratings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get user song ratings filtered",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Rating 10 matches\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userA}}/song-ratings?songId={{songId}}&minRating=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userA}}",
+                "song-ratings"
+              ],
+              "query": [
+                {
+                  "key": "songId",
+                  "value": "{{songId}}"
+                },
+                {
+                  "key": "minRating",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
           "name": "Get user rating history",
           "event": [
             {
@@ -736,7 +1825,7 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });"
                 ]
               }
             }
@@ -754,6 +1843,241 @@
                 "users",
                 "{{userA}}",
                 "ratings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter user ratings by album",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"User rated this album once\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userA}}/ratings?albumId={{albumId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userA}}",
+                "ratings"
+              ],
+              "query": [
+                {
+                  "key": "albumId",
+                  "value": "{{albumId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Charts",
+      "item": [
+        {
+          "name": "Top albums",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Sorted by average rating\", () => { const c = pm.response.json().content; for (let i = 1; i < c.length; i++) pm.expect(c[i - 1].averageRating >= c[i].averageRating).to.be.true; });",
+                  "pm.test(\"Ranks start at 1\", () => { const c = pm.response.json().content; if (c.length) pm.expect(c[0].rank === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/charts/top-albums",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "charts",
+                "top-albums"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Top albums of test artist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Test album is ranked with its rating\", () => { const e = pm.response.json().content.find(x => x.albumId == pm.collectionVariables.get(\"albumId\")); pm.expect(e.averageRating === 8 && e.ratingCount === 1).to.be.true; });",
+                  "pm.test(\"Combines album and artist\", () => { const e = pm.response.json().content[0]; pm.expect(e.title === \"Loveless (Remastered)\" && e.artistName === \"My Bloody Valentine\").to.be.true; });",
+                  "pm.test(\"Has hypermedia links\", () => { const l = pm.response.json().content[0]._links; pm.expect(l.album.href).to.include(\"/albums/\" + pm.collectionVariables.get(\"albumId\")); pm.expect(l.artist.href).to.include(\"/api/artists/\" + pm.collectionVariables.get(\"artistId\")); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/charts/top-albums?artistId={{artistId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "charts",
+                "top-albums"
+              ],
+              "query": [
+                {
+                  "key": "artistId",
+                  "value": "{{artistId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Top albums - minRatings filter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Album with 1 rating is excluded\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/charts/top-albums?artistId={{artistId}}&minRatings=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "charts",
+                "top-albums"
+              ],
+              "query": [
+                {
+                  "key": "artistId",
+                  "value": "{{artistId}}"
+                },
+                {
+                  "key": "minRatings",
+                  "value": "2"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Top songs of test artist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Test song is ranked with its rating\", () => { const e = pm.response.json().content.find(x => x.songId == pm.collectionVariables.get(\"songId\")); pm.expect(e.averageRating === 10 && e.albumTitle === \"Loveless (Remastered)\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/charts/top-songs?artistId={{artistId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "charts",
+                "top-songs"
+              ],
+              "query": [
+                {
+                  "key": "artistId",
+                  "value": "{{artistId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Top songs - paging",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Page has at most 1 entry\", () => { const b = pm.response.json(); pm.expect(b.content.length <= 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/charts/top-songs?size=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "charts",
+                "top-songs"
+              ],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "1"
+                }
               ]
             }
           }
@@ -815,8 +2139,8 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });",
-                  "pm.test(\"Has 1 review\", () => { const b = pm.response.json(); pm.expect(b.length === 1).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Has 1 review\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
                 ]
               }
             }
@@ -919,7 +2243,7 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });"
                 ]
               }
             }
@@ -951,7 +2275,7 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });"
                 ]
               }
             }
@@ -967,6 +2291,132 @@
               "path": [
                 "api",
                 "reviews"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter reviews by title and user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Exactly 1 review matches\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });",
+                  "pm.test(\"It is the written review\", () => { const b = pm.response.json(); pm.expect(b.content.some(x => x.id == pm.collectionVariables.get(\"reviewId\"))).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews?title=wall&userId={{userA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "wall"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userA}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter reviews by date - no match",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"No reviews in 2000\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews?userId={{userA}}&from=2000-01-01&to=2000-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{userA}}"
+                },
+                {
+                  "key": "from",
+                  "value": "2000-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2000-12-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter album reviews by user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"User B wrote no review\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albums/{{albumId}}/reviews?userId={{userB}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albums",
+                "{{albumId}}",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{userB}}"
+                }
               ]
             }
           }
@@ -1139,8 +2589,8 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });",
-                  "pm.test(\"User has 1 list\", () => { const b = pm.response.json(); pm.expect(b.length === 1).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"User has 1 list\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
                 ]
               }
             }
@@ -1172,7 +2622,7 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });"
                 ]
               }
             }
@@ -1188,6 +2638,87 @@
               "path": [
                 "api",
                 "lists"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter lists by name and user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Exactly 1 list matches\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });",
+                  "pm.test(\"It is the created list\", () => { const b = pm.response.json(); pm.expect(b.content.some(x => x.id == pm.collectionVariables.get(\"listId\"))).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lists?name=guitar&userId={{userA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "lists"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "guitar"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userA}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter user lists - no match",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"No lists match\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userA}}/lists?name=nothing-like-this",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userA}}",
+                "lists"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "nothing-like-this"
+                }
               ]
             }
           }
@@ -1272,8 +2803,8 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });",
-                  "pm.test(\"Has 1 favorite\", () => { const b = pm.response.json(); pm.expect(b.length === 1).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Has 1 favorite\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
                 ]
               }
             }
@@ -1291,6 +2822,84 @@
                 "users",
                 "{{userA}}",
                 "favorites"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter favorites by album title",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Favorite matches\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userA}}/favorites?albumTitle=loveless",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userA}}",
+                "favorites"
+              ],
+              "query": [
+                {
+                  "key": "albumTitle",
+                  "value": "loveless"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter favorites - no match",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"No favorites match\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userA}}/favorites?albumTitle=nothing-like-this",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userA}}",
+                "favorites"
+              ],
+              "query": [
+                {
+                  "key": "albumTitle",
+                  "value": "nothing-like-this"
+                }
               ]
             }
           }
@@ -1343,8 +2952,8 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });",
-                  "pm.test(\"Follows 1 user\", () => { const b = pm.response.json(); pm.expect(b.length === 1).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Follows 1 user\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
                 ]
               }
             }
@@ -1376,8 +2985,8 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });",
-                  "pm.test(\"Has 1 follower\", () => { const b = pm.response.json(); pm.expect(b.length === 1).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Has 1 follower\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
                 ]
               }
             }
@@ -1400,6 +3009,84 @@
           }
         },
         {
+          "name": "Filter following by username",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"User A matches\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userB}}/following?username=demo_a",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userB}}",
+                "following"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "demo_a"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter followers - no match",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"No followers match\", () => { const b = pm.response.json(); pm.expect(b.totalElements === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userA}}/followers?username=nothing-like-this",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userA}}",
+                "followers"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "nothing-like-this"
+                }
+              ]
+            }
+          }
+        },
+        {
           "name": "Get activity feed of user B",
           "event": [
             {
@@ -1409,9 +3096,9 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
-                  "pm.test(\"Body is an array\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b)).to.be.true; });",
-                  "pm.test(\"Feed contains the review\", () => { const b = pm.response.json(); pm.expect(b.some(a => a.type === \"ALBUM_REVIEW\")).to.be.true; });",
-                  "pm.test(\"Feed contains the rating\", () => { const b = pm.response.json(); pm.expect(b.some(a => a.type === \"ALBUM_RATING\")).to.be.true; });"
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Feed contains the review\", () => { const b = pm.response.json(); pm.expect(b.content.some(a => a.type === \"ALBUM_REVIEW\")).to.be.true; });",
+                  "pm.test(\"Feed contains the rating\", () => { const b = pm.response.json(); pm.expect(b.content.some(a => a.type === \"ALBUM_RATING\")).to.be.true; });"
                 ]
               }
             }
@@ -1429,6 +3116,84 @@
                 "users",
                 "{{userB}}",
                 "feed"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter feed by type",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Only reviews\", () => { const b = pm.response.json(); pm.expect(b.content.length > 0 && b.content.every(a => a.type === \"ALBUM_REVIEW\")).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userB}}/feed?type=ALBUM_REVIEW",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userB}}",
+                "feed"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "ALBUM_REVIEW"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Feed - page size 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Body is a page\", () => { const b = pm.response.json(); pm.expect(Array.isArray(b.content)).to.be.true; pm.expect(typeof b.totalElements === \"number\").to.be.true; pm.expect(b._links.self.href).to.be.a(\"string\"); });",
+                  "pm.test(\"Page has 1 item\", () => { const b = pm.response.json(); pm.expect(b.content.length === 1).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userB}}/feed?size=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userB}}",
+                "feed"
+              ],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "1"
+                }
               ]
             }
           }
@@ -1457,15 +3222,229 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/albums/999999999",
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/999999999",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "artists",
+                "{{artistId}}",
                 "albums",
                 "999999999"
               ]
+            }
+          }
+        },
+        {
+          "name": "404 - artist not found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Has error message\", () => { const b = pm.response.json(); pm.expect(typeof b.error === \"string\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/999999999/albums",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "999999999",
+                "albums"
+              ]
+            }
+          }
+        },
+        {
+          "name": "404 - album of another artist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Has error message\", () => { const b = pm.response.json(); pm.expect(typeof b.error === \"string\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{otherArtistId}}/albums/{{albumId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{otherArtistId}}",
+                "albums",
+                "{{albumId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "404 - songs via another artist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Has error message\", () => { const b = pm.response.json(); pm.expect(typeof b.error === \"string\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{otherArtistId}}/albums/{{albumId}}/songs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{otherArtistId}}",
+                "albums",
+                "{{albumId}}",
+                "songs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "404 - song via another artist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Has error message\", () => { const b = pm.response.json(); pm.expect(typeof b.error === \"string\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{otherArtistId}}/albums/{{albumId}}/songs/{{songId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{otherArtistId}}",
+                "albums",
+                "{{albumId}}",
+                "songs",
+                "{{songId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "404 - song not found in album",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Has error message\", () => { const b = pm.response.json(); pm.expect(typeof b.error === \"string\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}/songs/999999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums",
+                "{{albumId}}",
+                "songs",
+                "999999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "400 - song without track number",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Error mentions trackNumber\", () => { const b = pm.response.json(); pm.expect(b.error.includes(\"trackNumber\")).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}/songs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums",
+                "{{albumId}}",
+                "songs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"No track\"\n}"
             }
           }
         },
@@ -1664,15 +3643,132 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/albums/abc",
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/abc",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "artists",
+                "{{artistId}}",
                 "albums",
                 "abc"
               ]
+            }
+          }
+        },
+        {
+          "name": "400 - invalid sort field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Error mentions sort\", () => { const b = pm.response.json(); pm.expect(b.error.toLowerCase().includes(\"sort\")).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists?sort=bogus,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "bogus,asc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "400 - invalid filter date",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Error mentions releasedFrom\", () => { const b = pm.response.json(); pm.expect(b.error.includes(\"releasedFrom\")).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums?releasedFrom=yesterday",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums"
+              ],
+              "query": [
+                {
+                  "key": "releasedFrom",
+                  "value": "yesterday"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "400 - invalid cover URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "pm.test(\"Error mentions coverUrl\", () => { const b = pm.response.json(); pm.expect(b.error.includes(\"coverUrl\")).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Bad cover\",\n  \"coverUrl\": \"not a url\"\n}"
             }
           }
         },
@@ -2086,6 +4182,74 @@
           }
         },
         {
+          "name": "Delete song",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));",
+                  "pm.test(\"Body is empty\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}/songs/{{songId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums",
+                "{{albumId}}",
+                "songs",
+                "{{songId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Deleted song returns 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}/songs/{{songId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{artistId}}",
+                "albums",
+                "{{albumId}}",
+                "songs",
+                "{{songId}}"
+              ]
+            }
+          }
+        },
+        {
           "name": "Delete album",
           "event": [
             {
@@ -2103,12 +4267,14 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/albums/{{albumId}}",
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "artists",
+                "{{artistId}}",
                 "albums",
                 "{{albumId}}"
               ]
@@ -2133,44 +4299,16 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/albums/{{albumId}}",
+              "raw": "{{baseUrl}}/api/artists/{{artistId}}/albums/{{albumId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "artists",
+                "{{artistId}}",
                 "albums",
                 "{{albumId}}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Delete song",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));",
-                  "pm.test(\"Body is empty\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/songs/{{songId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "songs",
-                "{{songId}}"
               ]
             }
           }
@@ -2201,6 +4339,36 @@
                 "api",
                 "artists",
                 "{{artistId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete second artist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));",
+                  "pm.test(\"Body is empty\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/artists/{{otherArtistId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "{{otherArtistId}}"
               ]
             }
           }
@@ -2321,6 +4489,10 @@
     },
     {
       "key": "artistId",
+      "value": ""
+    },
+    {
+      "key": "otherArtistId",
       "value": ""
     },
     {

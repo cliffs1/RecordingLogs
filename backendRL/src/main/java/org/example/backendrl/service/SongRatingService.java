@@ -1,5 +1,6 @@
 package org.example.backendrl.service;
 
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.dto.SongRatingRequest;
 import org.example.backendrl.dto.SongRatingResponse;
 import org.example.backendrl.entity.Song;
@@ -10,10 +11,13 @@ import org.example.backendrl.exception.ResourceNotFoundException;
 import org.example.backendrl.repository.SongRatingRepository;
 import org.example.backendrl.repository.SongRepository;
 import org.example.backendrl.repository.UserRepository;
+import org.example.backendrl.repository.spec.Specs;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @Service
 public class SongRatingService {
@@ -32,18 +36,21 @@ public class SongRatingService {
         this.userRepository = userRepository;
     }
 
-    public List<SongRatingResponse> getRatingsForSong(Long songId) {
-
+    public PageResponse<SongRatingResponse> getRatingsForSong(
+            Long songId,
+            Integer minRating,
+            Integer maxRating,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
         if (!songRepository.existsById(songId)) {
             throw new ResourceNotFoundException(
                     "Song with id " + songId + " not found"
             );
         }
 
-        return songRatingRepository.findBySongId(songId)
-                .stream()
-                .map(SongRatingResponse::fromEntity)
-                .toList();
+        return searchRatings(null, songId, minRating, maxRating, from, to, pageable);
     }
 
     public SongRatingResponse getRating(Long songId, Long userId) {
@@ -147,17 +154,45 @@ public class SongRatingService {
         songRatingRepository.delete(songRating);
     }
 
-    public List<SongRatingResponse> getRatingsForUser(Long userId) {
-
+    public PageResponse<SongRatingResponse> getRatingsForUser(
+            Long userId,
+            Long songId,
+            Integer minRating,
+            Integer maxRating,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException(
                     "User with id " + userId + " not found"
             );
         }
 
-        return songRatingRepository.findByUserId(userId)
-                .stream()
-                .map(SongRatingResponse::fromEntity)
-                .toList();
+        return searchRatings(userId, songId, minRating, maxRating, from, to, pageable);
+    }
+
+    private PageResponse<SongRatingResponse> searchRatings(
+            Long userId,
+            Long songId,
+            Integer minRating,
+            Integer maxRating,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
+        Specification<SongRating> filter = Specs.all(
+                Specs.equal("user.id", userId),
+                Specs.equal("song.id", songId),
+                Specs.atLeast("rating", minRating),
+                Specs.atMost("rating", maxRating),
+                Specs.onOrAfter("updatedAt", from),
+                Specs.onOrBefore("updatedAt", to)
+        );
+
+        return PageResponse.from(
+                songRatingRepository.findAll(filter, pageable),
+                SongRatingResponse::fromEntity
+        );
     }
 }

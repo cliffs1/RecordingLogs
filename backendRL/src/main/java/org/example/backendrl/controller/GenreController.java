@@ -1,15 +1,21 @@
 package org.example.backendrl.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.example.backendrl.dto.GenreRequest;
 import org.example.backendrl.dto.GenreResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.service.GenreService;
-import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -27,8 +33,12 @@ public class GenreController {
     @GetMapping
     @Operation(summary = "Get all genres")
     @ApiResponse(responseCode = "200", description = "List of genres")
-    public List<GenreResponse> getAllGenres() {
-        return genreService.getAllGenres();
+    public PageResponse<GenreResponse> getAllGenres(
+            @Parameter(description = "Part of the genre name")
+            @RequestParam(required = false) String name,
+            @ParameterObject @PageableDefault(size = 20, sort = "name") Pageable pageable
+    ) {
+        return genreService.getAllGenres(name, pageable);
     }
 
     @GetMapping("/{id}")

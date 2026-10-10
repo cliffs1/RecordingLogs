@@ -1,13 +1,19 @@
 package org.example.backendrl.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.backendrl.dto.GenreResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.service.AlbumGenreService;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -30,10 +36,13 @@ public class AlbumGenreController {
             @ApiResponse(responseCode = "200", description = "List of genres"),
             @ApiResponse(responseCode = "404", description = "Album not found")
     })
-    public List<GenreResponse> getGenresForAlbum(
-            @PathVariable Long albumId
+    public PageResponse<GenreResponse> getGenresForAlbum(
+            @PathVariable Long albumId,
+            @Parameter(description = "Part of the genre name")
+            @RequestParam(required = false) String name,
+            @ParameterObject @PageableDefault(size = 20, sort = "genre.name") Pageable pageable
     ) {
-        return albumGenreService.getGenresForAlbum(albumId);
+        return albumGenreService.getGenresForAlbum(albumId, name, pageable);
     }
 
     @PostMapping("/{albumId}/genres/{genreId}")

@@ -2,12 +2,14 @@ package org.example.backendrl.service;
 
 import org.example.backendrl.dto.GenreRequest;
 import org.example.backendrl.dto.GenreResponse;
+import org.example.backendrl.dto.PageResponse;
 import org.example.backendrl.entity.Genre;
 import org.example.backendrl.exception.ResourceNotFoundException;
 import org.example.backendrl.repository.GenreRepository;
+import org.example.backendrl.repository.spec.Specs;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class GenreService {
@@ -18,11 +20,15 @@ public class GenreService {
         this.genreRepository = genreRepository;
     }
 
-    public List<GenreResponse> getAllGenres() {
-        return genreRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public PageResponse<GenreResponse> getAllGenres(String name, Pageable pageable) {
+        Specification<Genre> filter = Specs.all(
+                Specs.contains("name", name)
+        );
+
+        return PageResponse.from(
+                genreRepository.findAll(filter, pageable),
+                this::toResponse
+        );
     }
 
     public GenreResponse getGenre(Long id) {
