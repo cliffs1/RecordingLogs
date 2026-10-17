@@ -8,11 +8,12 @@ import org.example.backendrl.entity.AlbumReview;
 import org.example.backendrl.entity.User;
 import org.example.backendrl.exception.ConflictException;
 import org.example.backendrl.exception.ResourceNotFoundException;
-import org.example.backendrl.exception.UnprocessableEntityException;
+import org.example.backendrl.exception.ForbiddenException;
 import org.example.backendrl.repository.AlbumRepository;
 import org.example.backendrl.repository.AlbumReviewRepository;
 import org.example.backendrl.repository.UserRepository;
 import org.example.backendrl.repository.spec.Specs;
+import org.example.backendrl.security.CurrentUser;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -26,15 +27,18 @@ public class AlbumReviewService {
     private final AlbumReviewRepository albumReviewRepository;
     private final AlbumRepository albumRepository;
     private final UserRepository userRepository;
+    private final CurrentUser currentUser;
 
     public AlbumReviewService(
             AlbumReviewRepository albumReviewRepository,
             AlbumRepository albumRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            CurrentUser currentUser) {
 
         this.albumReviewRepository = albumReviewRepository;
         this.albumRepository = albumRepository;
         this.userRepository = userRepository;
+        this.currentUser = currentUser;
     }
 
     public PageResponse<AlbumReviewResponse> getAllReviews(
@@ -120,19 +124,20 @@ public class AlbumReviewService {
                                 "Album with id " + albumId + " not found"
                         ));
 
-        User user = userRepository.findById(request.getUserId())
+        Long userId = currentUser.id();
+
+        User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "User with id " + request.getUserId()
-                                        + " not found"
+                                "User with id " + userId + " not found"
                         ));
 
         if (albumReviewRepository.existsByAlbumIdAndUserId(
                 albumId,
-                request.getUserId())) {
+                userId)) {
 
             throw new ConflictException(
-                    "User " + request.getUserId()
+                    "User " + userId
                             + " has already reviewed album " + albumId
             );
         }
@@ -155,10 +160,9 @@ public class AlbumReviewService {
 
         AlbumReview review = findReview(reviewId);
 
-        if (!review.getUser().getId().equals(request.getUserId())) {
-            throw new UnprocessableEntityException(
-                    "User " + request.getUserId()
-                            + " is not the author of review " + reviewId
+        if (!review.getUser().getId().equals(currentUser.id())) {
+            throw new ForbiddenException(
+                    "You are not the author of review " + reviewId
             );
         }
 
@@ -174,6 +178,8 @@ public class AlbumReviewService {
     public void deleteReview(Long reviewId) {
 
         AlbumReview review = findReview(reviewId);
+
+        currentUser.requireSelfOrModerator(review.getUser().getId());
 
         albumReviewRepository.delete(review);
     }

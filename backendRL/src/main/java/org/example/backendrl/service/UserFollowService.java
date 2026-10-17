@@ -14,6 +14,7 @@ import org.example.backendrl.repository.SongRatingRepository;
 import org.example.backendrl.repository.UserFollowRepository;
 import org.example.backendrl.repository.UserRepository;
 import org.example.backendrl.repository.spec.Specs;
+import org.example.backendrl.security.CurrentUser;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,19 +36,22 @@ public class UserFollowService {
     private final AlbumRatingRepository albumRatingRepository;
     private final SongRatingRepository songRatingRepository;
     private final AlbumReviewRepository albumReviewRepository;
+    private final CurrentUser currentUser;
 
     public UserFollowService(
             UserFollowRepository userFollowRepository,
             UserRepository userRepository,
             AlbumRatingRepository albumRatingRepository,
             SongRatingRepository songRatingRepository,
-            AlbumReviewRepository albumReviewRepository) {
+            AlbumReviewRepository albumReviewRepository,
+            CurrentUser currentUser) {
 
         this.userFollowRepository = userFollowRepository;
         this.userRepository = userRepository;
         this.albumRatingRepository = albumRatingRepository;
         this.songRatingRepository = songRatingRepository;
         this.albumReviewRepository = albumReviewRepository;
+        this.currentUser = currentUser;
     }
 
     public PageResponse<UserFollowResponse> getFollowing(
@@ -99,6 +103,8 @@ public class UserFollowService {
             Long userId,
             Long targetId) {
 
+        currentUser.requireSelf(userId);
+
         User follower = findUser(userId);
         User followed = findUser(targetId);
 
@@ -134,6 +140,8 @@ public class UserFollowService {
             Long userId,
             Long targetId) {
 
+        currentUser.requireSelf(userId);
+
         UserFollow follow = userFollowRepository
                 .findByFollowerIdAndFollowedId(userId, targetId)
                 .orElseThrow(() ->
@@ -157,6 +165,8 @@ public class UserFollowService {
             LocalDate to,
             Pageable pageable
     ) {
+
+        currentUser.requireSelfOrAdmin(userId);
 
         checkUserExists(userId);
 

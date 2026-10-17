@@ -4,6 +4,7 @@ import org.example.backendrl.entity.*;
 import org.example.backendrl.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,12 @@ public class DataSeeder implements CommandLineRunner {
     private final AlbumListRepository albumListRepository;
     private final AlbumFavoriteRepository albumFavoriteRepository;
     private final UserFollowRepository userFollowRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    /**
+     * Password of every seeded account.
+     */
+    private static final String DEMO_PASSWORD = "password123";
 
     /**
      * Cover Art Archive image of a MusicBrainz release group (append "<mbid>/front-500").
@@ -54,7 +61,8 @@ public class DataSeeder implements CommandLineRunner {
             AlbumReviewRepository albumReviewRepository,
             AlbumListRepository albumListRepository,
             AlbumFavoriteRepository albumFavoriteRepository,
-            UserFollowRepository userFollowRepository) {
+            UserFollowRepository userFollowRepository,
+            PasswordEncoder passwordEncoder) {
 
         this.genreRepository = genreRepository;
         this.artistRepository = artistRepository;
@@ -68,6 +76,7 @@ public class DataSeeder implements CommandLineRunner {
         this.albumListRepository = albumListRepository;
         this.albumFavoriteRepository = albumFavoriteRepository;
         this.userFollowRepository = userFollowRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -203,6 +212,8 @@ public class DataSeeder implements CommandLineRunner {
         user("jonas", "jonas@example.com", "Jonas");
         user("ieva", "ieva@example.com", "Ieva");
         user("lukas", "lukas@example.com", "Lukas");
+        user("moderator", "moderator@example.com", "Moderator", Role.MODERATOR);
+        user("admin", "admin@example.com", "Administrator", Role.ADMIN);
     }
 
     private void seedActivity() {
@@ -352,12 +363,17 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void user(String username, String email, String displayName) {
+        user(username, email, displayName, Role.USER);
+    }
+
+    private void user(String username, String email, String displayName, Role role) {
 
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        user.setPassword("password123");
+        user.setPassword(passwordEncoder.encode(DEMO_PASSWORD));
         user.setDisplayName(displayName);
+        user.setRole(role);
         users.put(username, userRepository.save(user));
     }
 

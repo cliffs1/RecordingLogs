@@ -2,32 +2,37 @@ openapi: 3.1.0
 info:
   title: RecordingLogs API
   description: "Music rating and recommendation platform: genres, artists, albums,\
-    \ songs, ratings, reviews, album lists, favorites and follows."
+    \ songs, ratings, reviews, album lists, favorites and follows. Log in via POST\
+    \ /api/auth/login and use the access token with the Authorize button."
   version: "1.0"
 servers:
 - url: http://localhost:8080
   description: Generated server url
+security:
+- bearerAuth: []
 tags:
 - name: Reviews
   description: Album reviews written by users
-- name: Songs
-  description: Songs (tracks) of an album
 - name: Genres
   description: Music genres
 - name: Favorites
   description: Albums marked as favorite by users
-- name: Song ratings
-  description: Ratings given to songs by users
-- name: Follows
-  description: Following other users and their activity
 - name: Charts
   description: "Top-rated albums and songs, ranked by average user rating"
 - name: Artists
   description: Music artists
-- name: Lists
-  description: Personal album lists
 - name: Album ratings
   description: Ratings given to albums by users
+- name: Songs
+  description: Songs (tracks) of an album
+- name: Song ratings
+  description: Ratings given to songs by users
+- name: Follows
+  description: Following other users and their activity
+- name: Authentication
+  description: "Register, login, token refresh and logout"
+- name: Lists
+  description: Personal album lists
 - name: Albums
   description: Albums of an artist
 - name: Users
@@ -47,14 +52,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -63,8 +60,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -73,6 +70,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Not logged in
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -88,7 +109,7 @@ paths:
     put:
       tags:
       - Users
-      summary: Update a user
+      summary: "Update a user profile (own profile, or any profile as ADMIN)"
       operationId: updateUser
       parameters:
       - name: id
@@ -101,17 +122,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserRequest"
+              $ref: "#/components/schemas/UserUpdateRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -120,8 +133,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Username or email already taken
+        "403":
+          description: Not your profile
           content:
             '*/*':
               schema:
@@ -130,6 +143,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Not logged in
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Username or email already taken
           content:
             '*/*':
               schema:
@@ -145,7 +182,7 @@ paths:
     delete:
       tags:
       - Users
-      summary: Delete a user
+      summary: "Delete a user (own account, or any account as ADMIN)"
       operationId: deleteUser
       parameters:
       - name: id
@@ -155,14 +192,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -171,8 +200,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Not your account
           content:
             '*/*':
               schema:
@@ -181,6 +210,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Not logged in
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -209,14 +262,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Rating not found
           content:
@@ -225,8 +270,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -235,6 +280,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -272,14 +341,6 @@ paths:
               $ref: "#/components/schemas/SongRatingRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Rating not found
           content:
@@ -288,8 +349,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -298,6 +359,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -329,14 +414,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Rating not found
           content:
@@ -345,8 +422,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -355,6 +432,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -377,14 +478,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Review not found
           content:
@@ -393,8 +486,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -403,6 +496,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -434,14 +551,6 @@ paths:
               $ref: "#/components/schemas/AlbumReviewRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Review not found
           content:
@@ -450,8 +559,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Not the author of the review
           content:
             '*/*':
               schema:
@@ -459,7 +568,31 @@ paths:
                 additionalProperties:
                   type: string
         "422":
-          description: User is not the author of the review
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -485,14 +618,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Review not found
           content:
@@ -501,8 +626,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -511,6 +636,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -533,14 +682,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: List not found
           content:
@@ -549,8 +690,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -559,6 +700,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -590,14 +755,6 @@ paths:
               $ref: "#/components/schemas/AlbumListRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: List not found
           content:
@@ -606,8 +763,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Not the owner of the list
           content:
             '*/*':
               schema:
@@ -615,7 +772,31 @@ paths:
                 additionalProperties:
                   type: string
         "422":
-          description: User is not the owner of the list
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -641,14 +822,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: List not found
           content:
@@ -657,8 +830,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -667,6 +840,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -689,14 +886,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Genre not found
           content:
@@ -705,8 +894,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -715,6 +904,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -746,14 +959,6 @@ paths:
               $ref: "#/components/schemas/GenreRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Genre not found
           content:
@@ -762,8 +967,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -772,6 +977,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -797,14 +1026,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Genre not found
           content:
@@ -813,8 +1034,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -823,6 +1044,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -845,14 +1090,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Artist not found
           content:
@@ -861,8 +1098,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -871,6 +1108,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -902,14 +1163,6 @@ paths:
               $ref: "#/components/schemas/ArtistRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Artist not found
           content:
@@ -918,8 +1171,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -928,6 +1181,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -953,14 +1230,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Artist not found
           content:
@@ -969,8 +1238,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -979,6 +1248,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -1007,14 +1300,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Artist or album not found
           content:
@@ -1023,8 +1308,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1033,6 +1318,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -1070,14 +1379,6 @@ paths:
               $ref: "#/components/schemas/AlbumRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Artist or album not found
           content:
@@ -1086,8 +1387,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1096,6 +1397,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -1127,14 +1452,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Artist or album not found
           content:
@@ -1143,8 +1460,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1153,6 +1470,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -1187,14 +1528,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: "Artist, album or song not found"
           content:
@@ -1203,8 +1536,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1213,6 +1546,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -1256,14 +1613,6 @@ paths:
               $ref: "#/components/schemas/SongRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: "Artist, album or song not found"
           content:
@@ -1272,8 +1621,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1282,6 +1631,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -1319,14 +1692,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: "Artist, album or song not found"
           content:
@@ -1335,8 +1700,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1345,6 +1710,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -1373,14 +1762,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Rating not found
           content:
@@ -1389,8 +1770,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1399,6 +1780,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -1436,14 +1841,6 @@ paths:
               $ref: "#/components/schemas/AlbumRatingRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Rating not found
           content:
@@ -1452,8 +1849,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1462,6 +1859,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -1493,14 +1914,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Rating not found
           content:
@@ -1509,8 +1922,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1525,55 +1938,6 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "204":
-          description: Rating deleted
-  /api/users:
-    get:
-      tags:
-      - Users
-      summary: Get all users
-      operationId: getAllUsers
-      parameters:
-      - name: username
-        in: query
-        description: Part of the username
-        required: false
-        schema:
-          type: string
-      - name: displayName
-        in: query
-        description: Part of the display name
-        required: false
-        schema:
-          type: string
-      - name: page
-        in: query
-        description: Zero-based page index (0..N)
-        required: false
-        schema:
-          type: integer
-          default: 0
-          minimum: 0
-      - name: size
-        in: query
-        description: The size of the page to be returned
-        required: false
-        schema:
-          type: integer
-          default: 20
-          minimum: 1
-      - name: sort
-        in: query
-        description: "Sorting criteria in the format: property,(asc|desc). Default\
-          \ sort order is ascending. Multiple sort criteria are supported."
-        required: false
-        schema:
-          type: array
-          default:
-          - "username,ASC"
-          items:
-            type: string
-      responses:
         "400":
           description: Bad Request
           content:
@@ -1582,8 +1946,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "404":
-          description: Not Found
+        "401":
+          description: Unauthorized
           content:
             '*/*':
               schema:
@@ -1598,70 +1962,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "200":
-          description: List of users
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/PageResponseUserResponse"
-    post:
-      tags:
-      - Users
-      summary: Create a user
-      operationId: createUser
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserRequest"
-        required: true
-      responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "409":
-          description: Username or email already taken
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "422":
-          description: Unprocessable Content
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-        "201":
-          description: User created
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/UserResponse"
+        "204":
+          description: Rating deleted
   /api/users/{userId}/following/{targetId}:
     post:
       tags:
@@ -1682,14 +1984,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -1698,8 +1992,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Already following this user
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1708,6 +2002,30 @@ paths:
                   type: string
         "422":
           description: User cannot follow themselves
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Already following this user
           content:
             '*/*':
               schema:
@@ -1739,14 +2057,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User does not follow the target
           content:
@@ -1755,8 +2065,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1765,6 +2075,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -1793,14 +2127,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User or album not found
           content:
@@ -1809,8 +2135,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Album is already a favorite
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1819,6 +2145,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Album is already a favorite
           content:
             '*/*':
               schema:
@@ -1850,14 +2200,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Album is not a favorite of the user
           content:
@@ -1866,8 +2208,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1876,6 +2218,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -1953,14 +2319,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Song not found
           content:
@@ -1969,8 +2327,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -1979,6 +2337,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -2010,14 +2392,6 @@ paths:
               $ref: "#/components/schemas/SongRatingRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Song or user not found
           content:
@@ -2026,8 +2400,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: User already rated this song
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2036,6 +2410,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: User already rated this song
           content:
             '*/*':
               schema:
@@ -2068,14 +2466,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Song or genre not found
           content:
@@ -2084,8 +2474,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Song already has this genre
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2094,6 +2484,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Song already has this genre
           content:
             '*/*':
               schema:
@@ -2121,14 +2535,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: "Song, genre or link not found"
           content:
@@ -2137,8 +2543,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2147,6 +2553,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -2203,14 +2633,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Not Found
           content:
@@ -2219,8 +2641,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2229,6 +2651,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -2253,14 +2699,6 @@ paths:
               $ref: "#/components/schemas/AlbumListRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -2269,8 +2707,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2279,6 +2717,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -2315,16 +2777,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/AlbumListItemRequest"
-        required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: List or album not found
           content:
@@ -2333,8 +2786,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Album is already in the list
+        "403":
+          description: Not the owner of the list
           content:
             '*/*':
               schema:
@@ -2342,7 +2795,31 @@ paths:
                 additionalProperties:
                   type: string
         "422":
-          description: User is not the owner of the list
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Album is already in the list
           content:
             '*/*':
               schema:
@@ -2374,14 +2851,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: List not found or album not in list
           content:
@@ -2390,8 +2859,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2400,6 +2869,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -2449,14 +2942,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Not Found
           content:
@@ -2465,8 +2950,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2475,6 +2960,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -2499,14 +3008,6 @@ paths:
               $ref: "#/components/schemas/GenreRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Not Found
           content:
@@ -2515,8 +3016,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2531,12 +3032,308 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
         "201":
           description: Genre created
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/GenreResponse"
+  /api/auth/register:
+    post:
+      tags:
+      - Authentication
+      summary: Register a new account (role USER)
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRequest"
+        required: true
+      responses:
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "422":
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Username or email already taken
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "201":
+          description: Account created
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+      security: []
+  /api/auth/refresh:
+    post:
+      tags:
+      - Authentication
+      summary: Get a new access token using the refresh token cookie
+      description: "The refresh token is rotated: the old one stops working and a\
+        \ new cookie is set."
+      operationId: refresh
+      parameters:
+      - name: refresh_token
+        in: cookie
+        required: false
+        schema:
+          type: string
+      responses:
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "422":
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: "Refresh token missing, expired, revoked or reused"
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: New tokens issued
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+      security: []
+  /api/auth/logout:
+    post:
+      tags:
+      - Authentication
+      summary: Log out
+      description: Revokes the refresh token and invalidates the current access token.
+      operationId: logout
+      parameters:
+      - name: refresh_token
+        in: cookie
+        required: false
+        schema:
+          type: string
+      responses:
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "422":
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Not logged in
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "204":
+          description: Logged out
+  /api/auth/login:
+    post:
+      tags:
+      - Authentication
+      summary: Log in with username or email
+      description: Returns a short-lived access token and sets the refresh token as
+        an HttpOnly cookie.
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "422":
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Wrong credentials
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Logged in
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+      security: []
   /api/artists:
     get:
       tags:
@@ -2584,14 +3381,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Invalid paging or sort parameter
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Not Found
           content:
@@ -2600,8 +3389,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2610,6 +3399,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid paging or sort parameter
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -2634,14 +3447,6 @@ paths:
               $ref: "#/components/schemas/ArtistRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Not Found
           content:
@@ -2650,8 +3455,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2660,6 +3465,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -2692,14 +3521,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Artist or genre not found
           content:
@@ -2708,8 +3529,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Artist already has this genre
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2718,6 +3539,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Artist already has this genre
           content:
             '*/*':
               schema:
@@ -2745,14 +3590,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: "Artist, genre or link not found"
           content:
@@ -2761,8 +3598,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2771,6 +3608,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -2846,14 +3707,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: "Invalid filter, paging or sort parameter"
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Artist not found
           content:
@@ -2862,8 +3715,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2872,6 +3725,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: "Invalid filter, paging or sort parameter"
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -2903,14 +3780,6 @@ paths:
               $ref: "#/components/schemas/AlbumRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Artist not found
           content:
@@ -2919,8 +3788,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -2929,6 +3798,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -3016,14 +3909,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: "Invalid filter, paging or sort parameter"
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Artist or album not found
           content:
@@ -3032,8 +3917,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -3042,6 +3927,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: "Invalid filter, paging or sort parameter"
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -3079,14 +3988,6 @@ paths:
               $ref: "#/components/schemas/SongRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Artist or album not found
           content:
@@ -3095,8 +3996,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -3105,6 +4006,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -3185,14 +4110,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Album not found
           content:
@@ -3201,8 +4118,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -3211,6 +4128,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -3242,14 +4183,6 @@ paths:
               $ref: "#/components/schemas/AlbumReviewRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Album or user not found
           content:
@@ -3258,8 +4191,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: User already reviewed this album
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -3268,6 +4201,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: User already reviewed this album
           content:
             '*/*':
               schema:
@@ -3349,14 +4306,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Album not found
           content:
@@ -3365,8 +4314,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -3375,6 +4324,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -3406,14 +4379,6 @@ paths:
               $ref: "#/components/schemas/AlbumRatingRequest"
         required: true
       responses:
-        "400":
-          description: Invalid request body
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Album or user not found
           content:
@@ -3422,8 +4387,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: User already rated this album
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -3432,6 +4397,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid request body
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: User already rated this album
           content:
             '*/*':
               schema:
@@ -3464,14 +4453,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Album or genre not found
           content:
@@ -3480,8 +4461,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Album already has this genre
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -3490,6 +4471,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Album already has this genre
           content:
             '*/*':
               schema:
@@ -3517,14 +4522,6 @@ paths:
           type: integer
           format: int64
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: "Album, genre or link not found"
           content:
@@ -3533,8 +4530,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -3549,8 +4546,207 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
         "204":
           description: Genre removed from album
+  /api/users/{id}/role:
+    patch:
+      tags:
+      - Users
+      summary: Change a user's role (ADMIN)
+      operationId: updateRole
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleUpdateRequest"
+        required: true
+      responses:
+        "404":
+          description: User not found
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "403":
+          description: "Not an administrator, or changing own role"
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "422":
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid role
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Not logged in
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Role changed
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /api/users:
+    get:
+      tags:
+      - Users
+      summary: Get all users (ADMIN)
+      operationId: getAllUsers
+      parameters:
+      - name: username
+        in: query
+        description: Part of the username
+        required: false
+        schema:
+          type: string
+      - name: displayName
+        in: query
+        description: Part of the display name
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        required: false
+        schema:
+          type: array
+          default:
+          - "username,ASC"
+          items:
+            type: string
+      responses:
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "403":
+          description: Not an administrator
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "422":
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Not logged in
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: List of users
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseUserResponse"
   /api/users/{userId}/song-ratings:
     get:
       tags:
@@ -3627,14 +4823,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -3643,8 +4831,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -3653,6 +4841,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -3733,14 +4945,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -3749,8 +4953,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -3759,6 +4963,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -3847,14 +5075,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -3863,8 +5083,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -3873,6 +5093,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -3932,14 +5176,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -3948,8 +5184,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -3958,6 +5194,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -4017,14 +5277,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -4033,8 +5285,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -4043,6 +5295,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -4102,14 +5378,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -4118,8 +5386,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -4128,6 +5396,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -4205,14 +5497,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -4221,8 +5505,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -4231,6 +5515,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -4304,14 +5612,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: User not found
           content:
@@ -4320,8 +5620,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -4330,6 +5630,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -4389,14 +5713,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Song not found
           content:
@@ -4405,8 +5721,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -4415,6 +5731,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -4496,14 +5836,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Not Found
           content:
@@ -4512,8 +5844,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -4522,6 +5854,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -4595,14 +5951,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Genre not found
           content:
@@ -4611,8 +5959,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -4621,6 +5969,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -4680,14 +6052,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Genre not found
           content:
@@ -4696,8 +6060,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -4706,6 +6070,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -4779,14 +6167,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Genre not found
           content:
@@ -4795,8 +6175,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -4805,6 +6185,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -4880,14 +6284,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Invalid parameter
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Not Found
           content:
@@ -4896,8 +6292,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -4906,6 +6302,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid parameter
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -4981,14 +6401,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Invalid parameter
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Not Found
           content:
@@ -4997,8 +6409,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -5013,12 +6425,97 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
+        "400":
+          description: Invalid parameter
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
         "200":
           description: Page of chart entries
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PageResponseTopAlbumResponse"
+  /api/auth/me:
+    get:
+      tags:
+      - Authentication
+      summary: Get the logged in user's profile
+      operationId: me
+      responses:
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "422":
+          description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Not logged in
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Current user
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
   /api/artists/{artistId}/genres:
     get:
       tags:
@@ -5066,14 +6563,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Artist not found
           content:
@@ -5082,8 +6571,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -5092,6 +6581,30 @@ paths:
                   type: string
         "422":
           description: Unprocessable Content
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
           content:
             '*/*':
               schema:
@@ -5151,14 +6664,6 @@ paths:
           items:
             type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
         "404":
           description: Album not found
           content:
@@ -5167,8 +6672,8 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-        "409":
-          description: Conflict
+        "403":
+          description: Forbidden
           content:
             '*/*':
               schema:
@@ -5183,6 +6688,30 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
         "200":
           description: List of genres
           content:
@@ -5191,7 +6720,7 @@ paths:
                 $ref: "#/components/schemas/PageResponseGenreResponse"
 components:
   schemas:
-    UserRequest:
+    UserUpdateRequest:
       type: object
       properties:
         username:
@@ -5204,13 +6733,14 @@ components:
           minLength: 1
         password:
           type: string
-          maxLength: 2147483647
-          minLength: 6
+          maxLength: 72
+          minLength: 8
         displayName:
           type: string
+          maxLength: 100
+          minLength: 0
       required:
       - email
-      - password
       - username
     UserResponse:
       type: object
@@ -5224,12 +6754,15 @@ components:
           type: string
         displayName:
           type: string
+        role:
+          type: string
+          enum:
+          - USER
+          - MODERATOR
+          - ADMIN
     SongRatingRequest:
       type: object
       properties:
-        userId:
-          type: integer
-          format: int64
         rating:
           type: integer
           format: int32
@@ -5237,7 +6770,6 @@ components:
           minimum: 1
       required:
       - rating
-      - userId
     SongRatingResponse:
       type: object
       properties:
@@ -5264,9 +6796,6 @@ components:
     AlbumReviewRequest:
       type: object
       properties:
-        userId:
-          type: integer
-          format: int64
         title:
           type: string
           maxLength: 200
@@ -5278,7 +6807,6 @@ components:
       required:
       - content
       - title
-      - userId
     AlbumReviewResponse:
       type: object
       properties:
@@ -5308,9 +6836,6 @@ components:
     AlbumListRequest:
       type: object
       properties:
-        userId:
-          type: integer
-          format: int64
         name:
           type: string
           maxLength: 100
@@ -5321,7 +6846,6 @@ components:
           minLength: 0
       required:
       - name
-      - userId
     AlbumListItemResponse:
       type: object
       properties:
@@ -5491,9 +7015,6 @@ components:
     AlbumRatingRequest:
       type: object
       properties:
-        userId:
-          type: integer
-          format: int64
         rating:
           type: integer
           format: int32
@@ -5501,7 +7022,6 @@ components:
           minimum: 1
       required:
       - rating
-      - userId
     AlbumRatingResponse:
       type: object
       properties:
@@ -5560,15 +7080,68 @@ components:
     AlbumListItemRequest:
       type: object
       properties:
-        userId:
-          type: integer
-          format: int64
         position:
           type: integer
           format: int32
           minimum: 1
+    UserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 50
+          minLength: 3
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          maxLength: 72
+          minLength: 8
+        displayName:
+          type: string
+          maxLength: 100
+          minLength: 0
       required:
-      - userId
+      - email
+      - password
+      - username
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+        expiresIn:
+          type: integer
+          format: int64
+        user:
+          $ref: "#/components/schemas/UserResponse"
+    LoginRequest:
+      type: object
+      properties:
+        login:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+      required:
+      - login
+      - password
+    RoleUpdateRequest:
+      type: object
+      properties:
+        role:
+          type: string
+          enum:
+          - USER
+          - MODERATOR
+          - ADMIN
+      required:
+      - role
     PageResponseUserResponse:
       type: object
       properties:
@@ -6082,3 +7655,8 @@ components:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/Link"
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

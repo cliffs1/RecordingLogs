@@ -89,6 +89,26 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Map<String, String> handleUnauthorized(
+            UnauthorizedException exception) {
+
+        return Map.of(
+                "error", exception.getMessage()
+        );
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handleForbidden(
+            ForbiddenException exception) {
+
+        return Map.of(
+                "error", exception.getMessage()
+        );
+    }
+
     @ExceptionHandler(UnprocessableEntityException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
     public Map<String, String> handleUnprocessable(

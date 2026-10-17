@@ -11,6 +11,7 @@ import org.example.backendrl.repository.AlbumFavoriteRepository;
 import org.example.backendrl.repository.AlbumRepository;
 import org.example.backendrl.repository.UserRepository;
 import org.example.backendrl.repository.spec.Specs;
+import org.example.backendrl.security.CurrentUser;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -24,15 +25,18 @@ public class AlbumFavoriteService {
     private final AlbumFavoriteRepository albumFavoriteRepository;
     private final AlbumRepository albumRepository;
     private final UserRepository userRepository;
+    private final CurrentUser currentUser;
 
     public AlbumFavoriteService(
             AlbumFavoriteRepository albumFavoriteRepository,
             AlbumRepository albumRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            CurrentUser currentUser) {
 
         this.albumFavoriteRepository = albumFavoriteRepository;
         this.albumRepository = albumRepository;
         this.userRepository = userRepository;
+        this.currentUser = currentUser;
     }
 
     public PageResponse<AlbumFavoriteResponse> getFavoritesForUser(
@@ -66,6 +70,8 @@ public class AlbumFavoriteService {
             Long userId,
             Long albumId) {
 
+        currentUser.requireSelf(userId);
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
@@ -98,6 +104,8 @@ public class AlbumFavoriteService {
     public void removeFavorite(
             Long userId,
             Long albumId) {
+
+        currentUser.requireSelf(userId);
 
         AlbumFavorite favorite = albumFavoriteRepository
                 .findByUserIdAndAlbumId(userId, albumId)

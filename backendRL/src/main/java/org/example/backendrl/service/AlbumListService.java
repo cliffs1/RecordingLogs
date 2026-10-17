@@ -10,11 +10,12 @@ import org.example.backendrl.entity.AlbumListItem;
 import org.example.backendrl.entity.User;
 import org.example.backendrl.exception.ConflictException;
 import org.example.backendrl.exception.ResourceNotFoundException;
-import org.example.backendrl.exception.UnprocessableEntityException;
+import org.example.backendrl.exception.ForbiddenException;
 import org.example.backendrl.repository.AlbumListRepository;
 import org.example.backendrl.repository.AlbumRepository;
 import org.example.backendrl.repository.UserRepository;
 import org.example.backendrl.repository.spec.Specs;
+import org.example.backendrl.security.CurrentUser;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -29,15 +30,18 @@ public class AlbumListService {
     private final AlbumListRepository albumListRepository;
     private final AlbumRepository albumRepository;
     private final UserRepository userRepository;
+    private final CurrentUser currentUser;
 
     public AlbumListService(
             AlbumListRepository albumListRepository,
             AlbumRepository albumRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            CurrentUser currentUser) {
 
         this.albumListRepository = albumListRepository;
         this.albumRepository = albumRepository;
         this.userRepository = userRepository;
+        this.currentUser = currentUser;
     }
 
     @Transactional(readOnly = true)
@@ -89,11 +93,12 @@ public class AlbumListService {
     @Transactional
     public AlbumListResponse createList(AlbumListRequest request) {
 
-        User user = userRepository.findById(request.getUserId())
+        Long userId = currentUser.id();
+
+        User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "User with id " + request.getUserId()
-                                        + " not found"
+                                "User with id " + userId + " not found"
                         ));
 
         AlbumList albumList = new AlbumList();
@@ -113,7 +118,7 @@ public class AlbumListService {
 
         AlbumList albumList = findList(listId);
 
-        checkOwner(albumList, request.getUserId());
+        checkOwner(albumList);
 
         albumList.setName(request.getName());
         albumList.setDescription(request.getDescription());
@@ -128,6 +133,10 @@ public class AlbumListService {
 
         AlbumList albumList = findList(listId);
 
+        if (!currentUser.isAdmin()) {
+            checkOwner(albumList);
+        }
+
         albumListRepository.delete(albumList);
     }
 
@@ -139,7 +148,7 @@ public class AlbumListService {
 
         AlbumList albumList = findList(listId);
 
-        checkOwner(albumList, request.getUserId());
+        checkOwner(albumList);
 
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() ->
@@ -157,7 +166,7 @@ public class AlbumListService {
             );
         }
 
-        int position = request.getPosition() != null
+        int position = request != null && request.getPosition() != null
                 ? request.getPosition()
                 : albumList.getAlbums().size() + 1;
 
@@ -179,6 +188,8 @@ public class AlbumListService {
             Long albumId) {
 
         AlbumList albumList = findList(listId);
+
+        checkOwner(albumList);
 
         AlbumListItem item = albumList.getAlbums()
                 .stream()
@@ -212,12 +223,11 @@ public class AlbumListService {
                         ));
     }
 
-    private void checkOwner(AlbumList albumList, Long userId) {
+    private void checkOwner(AlbumList albumList) {
 
-        if (!albumList.getUser().getId().equals(userId)) {
-            throw new UnprocessableEntityException(
-                    "User " + userId + " is not the owner of list "
-                            + albumList.getId()
+        if (!albumList.getUser().getId().equals(currentUser.id())) {
+            throw new ForbiddenException(
+                    "You are not the owner of list " + albumList.getId()
             );
         }
     }

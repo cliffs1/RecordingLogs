@@ -1,5 +1,6 @@
 package org.example.backendrl.dto;
 
+import org.example.backendrl.entity.Role;
 import org.example.backendrl.entity.User;
 
 public class UserResponse {
@@ -8,6 +9,7 @@ public class UserResponse {
     private String username;
     private String email;
     private String displayName;
+    private Role role;
 
     public UserResponse() {
     }
@@ -16,12 +18,14 @@ public class UserResponse {
             Long id,
             String username,
             String email,
-            String displayName) {
+            String displayName,
+            Role role) {
 
         this.id = id;
         this.username = username;
         this.email = email;
         this.displayName = displayName;
+        this.role = role;
     }
 
     public static UserResponse fromEntity(User user) {
@@ -29,7 +33,8 @@ public class UserResponse {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getDisplayName()
+                user.getDisplayName(),
+                user.getRole()
         );
     }
 
@@ -47,5 +52,9 @@ public class UserResponse {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public Role getRole() {
+        return role;
     }
 }

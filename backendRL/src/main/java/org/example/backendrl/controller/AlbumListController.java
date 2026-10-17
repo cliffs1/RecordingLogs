@@ -89,7 +89,7 @@ public class AlbumListController {
             @ApiResponse(responseCode = "200", description = "List updated"),
             @ApiResponse(responseCode = "400", description = "Invalid request body"),
             @ApiResponse(responseCode = "404", description = "List not found"),
-            @ApiResponse(responseCode = "422", description = "User is not the owner of the list")
+            @ApiResponse(responseCode = "403", description = "Not the owner of the list")
     })
     public AlbumListResponse updateList(
             @PathVariable Long listId,
@@ -117,12 +117,12 @@ public class AlbumListController {
             @ApiResponse(responseCode = "400", description = "Invalid request body"),
             @ApiResponse(responseCode = "404", description = "List or album not found"),
             @ApiResponse(responseCode = "409", description = "Album is already in the list"),
-            @ApiResponse(responseCode = "422", description = "User is not the owner of the list")
+            @ApiResponse(responseCode = "403", description = "Not the owner of the list")
     })
     public AlbumListResponse addAlbum(
             @PathVariable Long listId,
             @PathVariable Long albumId,
-            @Valid @RequestBody AlbumListItemRequest request) {
+            @Valid @RequestBody(required = false) AlbumListItemRequest request) {
 
         return albumListService.addAlbum(listId, albumId, request);
     }

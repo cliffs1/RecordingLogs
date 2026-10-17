@@ -12,6 +12,7 @@ import org.example.backendrl.repository.SongRatingRepository;
 import org.example.backendrl.repository.SongRepository;
 import org.example.backendrl.repository.UserRepository;
 import org.example.backendrl.repository.spec.Specs;
+import org.example.backendrl.security.CurrentUser;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -25,15 +26,18 @@ public class SongRatingService {
     private final SongRatingRepository songRatingRepository;
     private final SongRepository songRepository;
     private final UserRepository userRepository;
+    private final CurrentUser currentUser;
 
     public SongRatingService(
             SongRatingRepository songRatingRepository,
             SongRepository songRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            CurrentUser currentUser) {
 
         this.songRatingRepository = songRatingRepository;
         this.songRepository = songRepository;
         this.userRepository = userRepository;
+        this.currentUser = currentUser;
     }
 
     public PageResponse<SongRatingResponse> getRatingsForSong(
@@ -89,19 +93,20 @@ public class SongRatingService {
                                 "Song with id " + songId + " not found"
                         ));
 
-        User user = userRepository.findById(request.getUserId())
+        Long userId = currentUser.id();
+
+        User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "User with id " + request.getUserId()
-                                        + " not found"
+                                "User with id " + userId + " not found"
                         ));
 
         if (songRatingRepository.existsBySongIdAndUserId(
                 songId,
-                request.getUserId())) {
+                userId)) {
 
             throw new ConflictException(
-                    "User " + request.getUserId()
+                    "User " + userId
                             + " has already rated song " + songId
             );
         }
@@ -124,6 +129,8 @@ public class SongRatingService {
             Long userId,
             SongRatingRequest request) {
 
+        currentUser.requireSelf(userId);
+
         SongRating songRating = songRatingRepository
                 .findBySongIdAndUserId(songId, userId)
                 .orElseThrow(() ->
@@ -142,6 +149,8 @@ public class SongRatingService {
 
     @Transactional
     public void deleteRating(Long songId, Long userId) {
+
+        currentUser.requireSelfOrModerator(userId);
 
         SongRating songRating = songRatingRepository
                 .findBySongIdAndUserId(songId, userId)

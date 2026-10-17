@@ -1,13 +1,9 @@
 package org.example.backendrl.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class AlbumReviewRequest {
-
-    @NotNull(message = "User ID is required")
-    private Long userId;
 
     @NotBlank(message = "Title is required")
     @Size(max = 200, message = "Title must be at most 200 characters")
@@ -18,14 +14,6 @@ public class AlbumReviewRequest {
     private String content;
 
     public AlbumReviewRequest() {
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
 
     public String getTitle() {

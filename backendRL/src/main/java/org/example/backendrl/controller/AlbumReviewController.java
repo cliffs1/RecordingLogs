@@ -126,7 +126,7 @@ public class AlbumReviewController {
             @ApiResponse(responseCode = "200", description = "Review updated"),
             @ApiResponse(responseCode = "400", description = "Invalid request body"),
             @ApiResponse(responseCode = "404", description = "Review not found"),
-            @ApiResponse(responseCode = "422", description = "User is not the author of the review")
+            @ApiResponse(responseCode = "403", description = "Not the author of the review")
     })
     public AlbumReviewResponse updateReview(
             @PathVariable Long reviewId,
