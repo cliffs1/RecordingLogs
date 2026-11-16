@@ -1,0 +1,22 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+.page {
+  display: flex;
+  justify-content: center;
+  padding: var(--s-7) 0;
+  color: var(--violet-600);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

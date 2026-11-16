@@ -37,7 +37,7 @@ public class SongRatingResponse {
 
     public static SongRatingResponse fromEntity(SongRating songRating) {
 
-        return new SongRatingResponse(
+        SongRatingResponse response = new SongRatingResponse(
                 songRating.getId(),
                 songRating.getUser().getId(),
                 songRating.getUser().getUsername(),
@@ -46,6 +46,38 @@ public class SongRatingResponse {
                 songRating.getCreatedAt(),
                 songRating.getUpdatedAt()
         );
+        response.songTitle = songRating.getSong().getTitle();
+        response.albumId = songRating.getSong().getAlbum().getId();
+        response.albumTitle = songRating.getSong().getAlbum().getTitle();
+        response.artistId = songRating.getSong().getAlbum().getArtist().getId();
+        response.artistName = songRating.getSong().getAlbum().getArtist().getName();
+        return response;
+    }
+
+    private String songTitle;
+    private Long albumId;
+    private String albumTitle;
+    private Long artistId;
+    private String artistName;
+
+    public String getSongTitle() {
+        return songTitle;
+    }
+
+    public Long getAlbumId() {
+        return albumId;
+    }
+
+    public String getAlbumTitle() {
+        return albumTitle;
+    }
+
+    public Long getArtistId() {
+        return artistId;
+    }
+
+    public String getArtistName() {
+        return artistName;
     }
 
     public Long getId() {

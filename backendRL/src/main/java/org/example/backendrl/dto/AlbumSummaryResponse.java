@@ -10,6 +10,8 @@ public class AlbumSummaryResponse {
     private String title;
     private LocalDate releaseDate;
     private String coverUrl;
+    private Long artistId;
+    private String artistName;
 
     public AlbumSummaryResponse() {
     }
@@ -18,12 +20,16 @@ public class AlbumSummaryResponse {
             Long id,
             String title,
             LocalDate releaseDate,
-            String coverUrl
+            String coverUrl,
+            Long artistId,
+            String artistName
     ) {
         this.id = id;
         this.title = title;
         this.releaseDate = releaseDate;
         this.coverUrl = coverUrl;
+        this.artistId = artistId;
+        this.artistName = artistName;
     }
 
     public static AlbumSummaryResponse fromEntity(Album album) {
@@ -31,8 +37,18 @@ public class AlbumSummaryResponse {
                 album.getId(),
                 album.getTitle(),
                 album.getReleaseDate(),
-                album.getCoverUrl()
+                album.getCoverUrl(),
+                album.getArtist().getId(),
+                album.getArtist().getName()
         );
+    }
+
+    public Long getArtistId() {
+        return artistId;
+    }
+
+    public String getArtistName() {
+        return artistName;
     }
 
     public Long getId() {

@@ -11,6 +11,9 @@ public class ActivityResponse {
     private String targetTitle;
     private String value;
     private LocalDateTime timestamp;
+    /** Album the activity belongs to (the song's album for SONG_RATING). */
+    private Long albumId;
+    private Long artistId;
 
     public ActivityResponse() {
     }
@@ -22,7 +25,9 @@ public class ActivityResponse {
             Long targetId,
             String targetTitle,
             String value,
-            LocalDateTime timestamp) {
+            LocalDateTime timestamp,
+            Long albumId,
+            Long artistId) {
 
         this.type = type;
         this.userId = userId;
@@ -31,6 +36,16 @@ public class ActivityResponse {
         this.targetTitle = targetTitle;
         this.value = value;
         this.timestamp = timestamp;
+        this.albumId = albumId;
+        this.artistId = artistId;
+    }
+
+    public Long getAlbumId() {
+        return albumId;
+    }
+
+    public Long getArtistId() {
+        return artistId;
     }
 
     public String getType() {

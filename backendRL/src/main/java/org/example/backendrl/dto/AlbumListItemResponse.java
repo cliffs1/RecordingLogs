@@ -8,6 +8,8 @@ public class AlbumListItemResponse {
     private String title;
     private String coverUrl;
     private Integer position;
+    private Long artistId;
+    private String artistName;
 
     public AlbumListItemResponse() {
     }
@@ -16,12 +18,16 @@ public class AlbumListItemResponse {
             Long albumId,
             String title,
             String coverUrl,
-            Integer position) {
+            Integer position,
+            Long artistId,
+            String artistName) {
 
         this.albumId = albumId;
         this.title = title;
         this.coverUrl = coverUrl;
         this.position = position;
+        this.artistId = artistId;
+        this.artistName = artistName;
     }
 
     public static AlbumListItemResponse fromEntity(AlbumListItem item) {
@@ -29,8 +35,18 @@ public class AlbumListItemResponse {
                 item.getAlbum().getId(),
                 item.getAlbum().getTitle(),
                 item.getAlbum().getCoverUrl(),
-                item.getPosition()
+                item.getPosition(),
+                item.getAlbum().getArtist().getId(),
+                item.getAlbum().getArtist().getName()
         );
+    }
+
+    public Long getArtistId() {
+        return artistId;
+    }
+
+    public String getArtistName() {
+        return artistName;
     }
 
     public Long getAlbumId() {

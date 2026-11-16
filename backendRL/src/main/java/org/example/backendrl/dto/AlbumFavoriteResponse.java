@@ -12,6 +12,8 @@ public class AlbumFavoriteResponse {
     private String albumTitle;
     private String coverUrl;
     private LocalDateTime createdAt;
+    private Long artistId;
+    private String artistName;
 
     public AlbumFavoriteResponse() {
     }
@@ -22,7 +24,9 @@ public class AlbumFavoriteResponse {
             Long albumId,
             String albumTitle,
             String coverUrl,
-            LocalDateTime createdAt) {
+            LocalDateTime createdAt,
+            Long artistId,
+            String artistName) {
 
         this.id = id;
         this.userId = userId;
@@ -30,6 +34,8 @@ public class AlbumFavoriteResponse {
         this.albumTitle = albumTitle;
         this.coverUrl = coverUrl;
         this.createdAt = createdAt;
+        this.artistId = artistId;
+        this.artistName = artistName;
     }
 
     public static AlbumFavoriteResponse fromEntity(AlbumFavorite favorite) {
@@ -39,8 +45,18 @@ public class AlbumFavoriteResponse {
                 favorite.getAlbum().getId(),
                 favorite.getAlbum().getTitle(),
                 favorite.getAlbum().getCoverUrl(),
-                favorite.getCreatedAt()
+                favorite.getCreatedAt(),
+                favorite.getAlbum().getArtist().getId(),
+                favorite.getAlbum().getArtist().getName()
         );
+    }
+
+    public Long getArtistId() {
+        return artistId;
+    }
+
+    public String getArtistName() {
+        return artistName;
     }
 
     public Long getId() {

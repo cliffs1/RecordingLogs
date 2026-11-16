@@ -15,6 +15,9 @@ public class AlbumReviewResponse {
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long artistId;
+    private String artistName;
+    private String coverUrl;
 
     public AlbumReviewResponse() {
     }
@@ -28,7 +31,10 @@ public class AlbumReviewResponse {
             String title,
             String content,
             LocalDateTime createdAt,
-            LocalDateTime updatedAt) {
+            LocalDateTime updatedAt,
+            Long artistId,
+            String artistName,
+            String coverUrl) {
 
         this.id = id;
         this.userId = userId;
@@ -39,6 +45,9 @@ public class AlbumReviewResponse {
         this.content = content;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.artistId = artistId;
+        this.artistName = artistName;
+        this.coverUrl = coverUrl;
     }
 
     public static AlbumReviewResponse fromEntity(AlbumReview review) {
@@ -51,8 +60,23 @@ public class AlbumReviewResponse {
                 review.getTitle(),
                 review.getContent(),
                 review.getCreatedAt(),
-                review.getUpdatedAt()
+                review.getUpdatedAt(),
+                review.getAlbum().getArtist().getId(),
+                review.getAlbum().getArtist().getName(),
+                review.getAlbum().getCoverUrl()
         );
+    }
+
+    public Long getArtistId() {
+        return artistId;
+    }
+
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public String getCoverUrl() {
+        return coverUrl;
     }
 
     public Long getId() {

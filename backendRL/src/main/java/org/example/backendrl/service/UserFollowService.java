@@ -187,7 +187,9 @@ public class UserFollowService {
                             rating.getAlbum().getId(),
                             rating.getAlbum().getTitle(),
                             String.valueOf(rating.getRating()),
-                            rating.getUpdatedAt()
+                            rating.getUpdatedAt(),
+                            rating.getAlbum().getId(),
+                            rating.getAlbum().getArtist().getId()
                     )));
 
             songRatingRepository.findByUserIdInOrderByUpdatedAtDesc(followedIds)
@@ -198,7 +200,9 @@ public class UserFollowService {
                             rating.getSong().getId(),
                             rating.getSong().getTitle(),
                             String.valueOf(rating.getRating()),
-                            rating.getUpdatedAt()
+                            rating.getUpdatedAt(),
+                            rating.getSong().getAlbum().getId(),
+                            rating.getSong().getAlbum().getArtist().getId()
                     )));
 
             albumReviewRepository.findByUserIdInOrderByCreatedAtDesc(followedIds)
@@ -209,7 +213,9 @@ public class UserFollowService {
                             review.getAlbum().getId(),
                             review.getAlbum().getTitle(),
                             review.getTitle(),
-                            review.getCreatedAt()
+                            review.getCreatedAt(),
+                            review.getAlbum().getId(),
+                            review.getAlbum().getArtist().getId()
                     )));
         }
 

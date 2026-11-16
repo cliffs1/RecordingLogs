@@ -1,0 +1,145 @@
+.hero {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--s-6);
+  align-items: start;
+  margin-bottom: var(--s-7);
+}
+
+.coverWrap {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.4s var(--ease);
+}
+
+.coverWrap:hover {
+  transform: rotate(-1.5deg) scale(1.02);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+
+.info h1 {
+  font-size: 2.5rem;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+
+.big {
+  min-width: 64px;
+  height: 64px;
+  font-size: 1.75rem;
+}
+
+.favorite {
+  transition:
+    color 0.2s,
+    transform 0.2s var(--ease);
+}
+
+.favorite[aria-pressed="true"] {
+  color: var(--rose-600);
+  border-color: var(--rose-600);
+}
+
+.favorite[aria-pressed="true"] svg {
+  fill: var(--rose-600);
+  animation: beat 0.4s var(--ease);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--s-6);
+  align-items: start;
+}
+
+.track {
+  display: grid;
+  grid-template-columns: 32px 1fr auto auto;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--line);
+  transition: background-color 0.2s;
+}
+
+.track:last-child {
+  border-bottom: 0;
+}
+
+.track:hover {
+  background: var(--violet-50);
+}
+
+.trackNo {
+  font-family: var(--font-display), sans-serif;
+  color: var(--ink-500);
+  text-align: right;
+}
+
+.trackTitle {
+  border: 0;
+  background: none;
+  padding: 0;
+  text-align: left;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--ink-900);
+  transition: color 0.2s;
+}
+
+.trackTitle:hover {
+  color: var(--violet-600);
+}
+
+.trackActions {
+  display: flex;
+  gap: 2px;
+}
+
+.disc {
+  padding: var(--s-2) var(--s-4);
+  background: var(--page);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+@keyframes beat {
+  50% {
+    transform: scale(1.35);
+  }
+}
+
+@media (max-width: 1100px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: var(--s-5);
+  }
+
+  .coverWrap {
+    max-width: 280px;
+  }
+
+  .info h1 {
+    font-size: 1.875rem;
+  }
+}

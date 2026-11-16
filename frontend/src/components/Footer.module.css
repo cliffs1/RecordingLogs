@@ -1,0 +1,116 @@
+/* Footer area: warm cream band (distinct from the dark header and the cool content
+   area), small uppercase violet headings, ink links that slide on hover. */
+.footer {
+  margin-top: auto;
+  background: #fbf3e4;
+  color: var(--ink-700);
+  border-top: 4px solid var(--amber-500);
+  font-size: 0.875rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: var(--s-6);
+  padding-block: var(--s-7) var(--s-6);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+  color: var(--night-900);
+  font-size: 1.125rem;
+}
+
+.brand svg {
+  color: var(--amber-500);
+}
+
+.about p {
+  max-width: 34ch;
+  line-height: 1.6;
+}
+
+.heading {
+  margin-bottom: var(--s-3);
+  color: var(--violet-600);
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.links a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--ink-700);
+  text-decoration: underline;
+  text-decoration-color: rgb(255 181 71 / 0.6);
+  text-underline-offset: 4px;
+  transition:
+    color 0.2s,
+    transform 0.2s var(--ease);
+}
+
+.links a:hover {
+  color: var(--night-900);
+  transform: translateX(4px);
+}
+
+.badgeBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-4);
+  border: 1px dashed var(--amber-500);
+  border-radius: var(--radius);
+  background: rgb(255 255 255 / 0.5);
+  color: #b26b00;
+}
+
+.badgeBox strong {
+  color: var(--night-900);
+  font-weight: 600;
+}
+
+.fine {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  color: var(--ink-500);
+  font-size: 0.75rem;
+}
+
+.bottom {
+  padding-block: var(--s-4);
+  background: var(--amber-500);
+  color: var(--night-950);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-5);
+    padding-block: var(--s-6) var(--s-5);
+  }
+
+  .about,
+  .badgeBox {
+    grid-column: 1 / -1;
+  }
+}

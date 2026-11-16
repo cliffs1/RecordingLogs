@@ -1,0 +1,123 @@
+.dialog {
+  width: min(560px, calc(100vw - 2 * var(--s-4)));
+  max-height: calc(100vh - 2 * var(--s-5));
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink-900);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.sm {
+  width: min(420px, calc(100vw - 2 * var(--s-4)));
+}
+
+.lg {
+  width: min(820px, calc(100vw - 2 * var(--s-4)));
+}
+
+.dialog[open] {
+  animation: pop 0.28s var(--ease) both;
+}
+
+.dialog::backdrop {
+  background: rgb(15 13 36 / 0.6);
+  backdrop-filter: blur(3px);
+  animation: fade 0.25s ease both;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 2 * var(--s-5));
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-5) var(--s-5) var(--s-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  background: var(--violet-50);
+  color: var(--violet-600);
+}
+
+.titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.description {
+  margin-top: var(--s-1);
+  color: var(--ink-500);
+  font-size: 0.9375rem;
+}
+
+.close {
+  display: inline-flex;
+  padding: var(--s-1);
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-500);
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    transform 0.2s;
+}
+
+.close:hover {
+  background: var(--violet-50);
+  color: var(--violet-600);
+  transform: rotate(90deg);
+}
+
+.body {
+  padding: var(--s-5);
+  overflow-y: auto;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .head,
+  .body {
+    padding-inline: var(--s-4);
+  }
+}

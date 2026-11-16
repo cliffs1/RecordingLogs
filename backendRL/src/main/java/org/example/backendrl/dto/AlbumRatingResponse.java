@@ -37,7 +37,7 @@ public class AlbumRatingResponse {
 
     public static AlbumRatingResponse fromEntity(AlbumRating albumRating) {
 
-        return new AlbumRatingResponse(
+        AlbumRatingResponse response = new AlbumRatingResponse(
                 albumRating.getId(),
                 albumRating.getUser().getId(),
                 albumRating.getUser().getUsername(),
@@ -46,6 +46,32 @@ public class AlbumRatingResponse {
                 albumRating.getCreatedAt(),
                 albumRating.getUpdatedAt()
         );
+        response.albumTitle = albumRating.getAlbum().getTitle();
+        response.coverUrl = albumRating.getAlbum().getCoverUrl();
+        response.artistId = albumRating.getAlbum().getArtist().getId();
+        response.artistName = albumRating.getAlbum().getArtist().getName();
+        return response;
+    }
+
+    private String albumTitle;
+    private String coverUrl;
+    private Long artistId;
+    private String artistName;
+
+    public String getAlbumTitle() {
+        return albumTitle;
+    }
+
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public Long getArtistId() {
+        return artistId;
+    }
+
+    public String getArtistName() {
+        return artistName;
     }
 
     public Long getId() {

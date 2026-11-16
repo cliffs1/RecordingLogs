@@ -1,0 +1,86 @@
+.hero {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  margin-bottom: var(--s-6);
+  padding: var(--s-5);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(120deg, var(--violet-50), #fff 60%);
+  border: 1px solid var(--violet-100);
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--amber-500), var(--violet-600));
+  color: #fff;
+  font-family: var(--font-display), sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.counts {
+  display: flex;
+  gap: var(--s-5);
+  flex-wrap: wrap;
+}
+
+.count {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--ink-500);
+  font-size: 0.9375rem;
+  transition: color 0.2s;
+}
+
+.count strong {
+  color: var(--ink-900);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.125rem;
+}
+
+.count:hover {
+  color: var(--violet-600);
+}
+
+.actions {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  align-self: flex-start;
+}
+
+.following {
+  background: var(--violet-50);
+  color: var(--violet-600);
+  border-color: var(--violet-100);
+}
+
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .avatar {
+    width: 72px;
+    height: 72px;
+    font-size: 1.5rem;
+  }
+}

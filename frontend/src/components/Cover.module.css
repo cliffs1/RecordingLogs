@@ -1,0 +1,33 @@
+.cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--night-800);
+}
+
+.cover img {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease);
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 30% 30%, var(--violet-500), transparent 60%),
+    linear-gradient(135deg, var(--night-800), var(--night-950));
+  color: rgb(255 255 255 / 0.5);
+}
+
+.placeholder svg {
+  width: 40%;
+  height: 40%;
+}
