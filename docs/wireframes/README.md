@@ -1,7 +1,5 @@
 # Wireframes
 
-Put the exported wireframe images (PNG/SVG) of the main screens here:
-
 - home.png
 ![home.png](home.png)
 - chart.png
